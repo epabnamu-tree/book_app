@@ -49,10 +49,9 @@ const Home: React.FC = () => {
               </h1>
             </div>
             <p className="text-lg text-gray-600 font-light max-w-lg leading-relaxed mx-auto md:mx-0">
-              사회과학의 질문과 기술 현장의 경험이 교차하는 길 위에서,
-              '기술이 누구를 위해 존재해야 하는가'를 끊임없이 고민합니다.<br/><br/>
-              <b>연구그룹 이팝나무</b>는 기술의 혜택이 모두에게<br/>
-              공정하게 흐르는 세상을 꿈꿉니다.
+              기술이 바꾸는 현실 속에서 사회과학의 눈으로 질문합니다. <br/>
+              <b>AI는 어떻게 존재해야 하는가?</b><br/>
+              연구그룹 이팝나무는 인공지능이 일부가 아닌 모두의 삶을 이롭게 하는 세상을 향해 연구하고 실천합니다.
             </p>
             <div className="pt-4 flex justify-center md:justify-start gap-4">
                <Link to="/about" className="px-8 py-3.5 bg-white border border-gray-200 text-primary rounded-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow flex items-center gap-3">
@@ -146,38 +145,37 @@ const Home: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold mb-8 leading-snug">
-                "기술은 차갑지만,<br/>경제는 따뜻해야 합니다."
+                AI 시대, 우리는<br/>인간 존엄에 대해 질문합니다.
               </h2>
               <div className="space-y-6 text-gray-300 leading-relaxed text-lg font-light">
                 <p>
-                  우리는 전례 없는 속도로 발전하는 AI 시대를 살아가고 있습니다.
-                  하지만 그 속도감 속에서 정작 중요한 '사람'의 가치는 희미해져 갑니다.
+                  과학적 데이터와 인문학적 상상력을 바탕으로,
+                  인공지능의 발전이 소수가 아닌 모두의 번영으로 이어지는 길을 찾습니다.
                 </p>
                 <p>
-                  저희는 경제학 데이터와 인문학적 상상력을 도구 삼아, 
-                  기술 발전이 소수가 아닌 모두의 번영으로 이어지는 길을 찾습니다.
-                  저희의 책들이 여러분에게 작은 나침반이 되기를 바랍니다.
+                  이 책이 그 길 위에서 작은 나침반이 되기를 바랍니다.
                 </p>
               </div>
               <div className="mt-10 flex gap-6">
                  <div className="flex items-center gap-3">
                    <div className="p-3 bg-white/10 rounded-full"><PenTool size={20}/></div>
-                   <span className="font-medium">20+ 칼럼 기고</span>
+                   <span className="font-medium">함께 공부하는 책 쓰기</span>
                  </div>
                  <div className="flex items-center gap-3">
                    <div className="p-3 bg-white/10 rounded-full"><Mic size={20}/></div>
-                   <span className="font-medium">50+ 강연 진행</span>
+                   <span className="font-medium">관련 강연 활동</span>
                  </div>
               </div>
             </div>
             <div className="bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl">
-               <h3 className="text-xl font-bold mb-6 text-secondary">주요 활동 분야</h3>
+               <h3 className="text-xl font-bold mb-6 text-secondary">주요 강의 주제</h3>
                <ul className="space-y-4">
                  {[
-                   "디지털 전환과 노동 시장의 변화 연구",
-                   "사회적 경제 기업 자문 및 컨설팅",
-                   "기본소득 한국 네트워크 정책 위원",
-                   "청년 협동조합 멘토링 프로그램 운영"
+                   "AI 시대의 우리는: (기본소득, 기본배당, 커먼즈)",
+                   "AI 넌 누구니? (인공지능 기초)",
+                   "공정무역은 왜? 활성화가 안 될까?",
+                   "블록체인과 새로운 금융시스템",
+                   "로컬푸드, 협동조합 그리고 살고 싶은 마을 이야기"
                  ].map((item, i) => (
                    <li key={i} className="flex items-start gap-3">
                      <ChevronRight className="text-secondary shrink-0 mt-1" size={16} />

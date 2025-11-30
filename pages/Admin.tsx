@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { Book, Resource } from '../types';
+import { Book, Resource, FaqItem } from '../types';
 
 // Helper to convert Google Drive share links to direct image links
 const convertGoogleDriveLink = (url: string) => {
@@ -50,12 +50,13 @@ const Admin: React.FC = () => {
     books, addBook, updateBook, deleteBook,
     posts, deleteComment, deletePost,
     resources, addResource, updateResource, deleteResource,
+    faqs, addFaq, updateFaq, deleteFaq,
     authorProfileImage, updateProfileImage
   } = useData();
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<'book' | 'resource' | 'community' | 'site'>('book');
+  const [activeTab, setActiveTab] = useState<'book' | 'resource' | 'community' | 'faq' | 'site'>('book');
 
   // --- Export Data State ---
   const [exportCode, setExportCode] = useState("");
@@ -73,6 +74,10 @@ const Admin: React.FC = () => {
   const [resourceForm, setResourceForm] = useState<Partial<Resource>>({
     title: "", type: "PDF", description: "", url: "", size: "", bookId: ""
   });
+
+  // --- FAQ State ---
+  const [isEditingFaq, setIsEditingFaq] = useState<number | string | null>(null);
+  const [faqForm, setFaqForm] = useState<Partial<FaqItem>>({ question: "", answer: "" });
 
   // --- Site Settings State ---
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -100,11 +105,7 @@ export const INITIAL_RESOURCES = ${JSON.stringify(resources, null, 2)};
 
 export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
 
-export const FAQS = [
-  { question: "강연 요청은 어떻게 하나요?", answer: "문의하기 페이지의 폼을 작성해주시거나 이메일로 연락 주시면 일정 확인 후 회신 드립니다." },
-  { question: "책 대량 구매 시 할인이 되나요?", answer: "네, 10권 이상 구매 시 출판사를 통해 할인 혜택을 안내해 드립니다." },
-  { question: "독서 모임 발제문은 어디서 구하나요?", answer: "자료실 메뉴에서 챕터별 토론 가이드북을 다운로드하실 수 있습니다." }
-];
+export const FAQS = ${JSON.stringify(faqs, null, 2)};
 
 export const CHAPTERS = [
   { id: 1, title: "1장. AI의 도래", description: "인공지능이 가져올 노동의 변화" },
@@ -113,7 +114,7 @@ export const CHAPTERS = [
 ];
     `;
     setExportCode(code);
-  }, [books, resources, posts]);
+  }, [books, resources, posts, faqs]);
 
   // --- Login Logic ---
   const handleLogin = (e: React.FormEvent) => {
@@ -223,6 +224,40 @@ export const CHAPTERS = [
     }
     
     resetResourceForm();
+  };
+
+  // --- FAQ Actions ---
+  const resetFaqForm = () => {
+    setFaqForm({ question: "", answer: "" });
+    setIsEditingFaq(null);
+  };
+
+  const handleEditFaq = (faq: FaqItem) => {
+    setIsEditingFaq(faq.id);
+    setFaqForm(faq);
+  };
+
+  const handleSaveFaq = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!faqForm.question || !faqForm.answer) {
+      alert("질문과 답변을 모두 입력해주세요.");
+      return;
+    }
+
+    const faqData: FaqItem = {
+      id: isEditingFaq || Date.now(),
+      question: faqForm.question!,
+      answer: faqForm.answer!
+    };
+
+    if (isEditingFaq) {
+      updateFaq(faqData);
+      alert("FAQ가 수정되었습니다.");
+    } else {
+      addFaq(faqData);
+      alert("FAQ가 등록되었습니다.");
+    }
+    resetFaqForm();
   };
 
   // --- Site Actions ---
@@ -338,6 +373,12 @@ export const CHAPTERS = [
             className={`px-6 py-3 font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'community' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
           >
             커뮤니티 관리
+          </button>
+          <button 
+            onClick={() => setActiveTab('faq')}
+            className={`px-6 py-3 font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'faq' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+          >
+            FAQ 관리
           </button>
           <button 
             onClick={() => setActiveTab('site')}
@@ -722,6 +763,73 @@ export const CHAPTERS = [
                 </div>
               </div>
             </div>
+          )}
+
+          {/* --- FAQ TAB --- */}
+          {activeTab === 'faq' && (
+             <div className="grid lg:grid-cols-2 gap-8">
+               <div className="lg:col-span-1 border-r border-gray-100 pr-0 lg:pr-8">
+                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+                    <HelpCircle size={20} className="text-secondary" />
+                    {isEditingFaq ? "FAQ 수정" : "FAQ 등록"}
+                 </h2>
+                 <form onSubmit={handleSaveFaq} className="space-y-4">
+                   <div>
+                     <label className="block text-xs font-bold text-gray-500 mb-1">질문 (Question)</label>
+                     <input 
+                       type="text" 
+                       className="w-full px-3 py-2 border rounded-lg focus:border-secondary outline-none bg-white text-gray-900"
+                       value={faqForm.question} 
+                       onChange={(e) => setFaqForm({...faqForm, question: e.target.value})} 
+                       required 
+                     />
+                   </div>
+                   <div>
+                     <label className="block text-xs font-bold text-gray-500 mb-1">답변 (Answer)</label>
+                     <textarea 
+                       rows={5} 
+                       className="w-full px-3 py-2 border rounded-lg focus:border-secondary outline-none resize-none bg-white text-gray-900"
+                       value={faqForm.answer} 
+                       onChange={(e) => setFaqForm({...faqForm, answer: e.target.value})} 
+                       required 
+                     ></textarea>
+                   </div>
+                   <div className="flex gap-2">
+                     <button type="submit" className="flex-1 py-3 bg-secondary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors">
+                       {isEditingFaq ? "수정 완료" : "FAQ 등록"}
+                     </button>
+                     {isEditingFaq && (
+                       <button type="button" onClick={resetFaqForm} className="px-6 py-3 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
+                         취소
+                       </button>
+                     )}
+                   </div>
+                 </form>
+               </div>
+
+               <div className="lg:col-span-1">
+                 <h2 className="text-xl font-bold mb-6 text-primary">FAQ 목록 ({faqs.length})</h2>
+                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                   {faqs.map(faq => (
+                     <div key={faq.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-secondary transition-colors group">
+                       <div className="flex justify-between items-start mb-2">
+                         <h4 className="font-bold text-primary">Q. {faq.question}</h4>
+                         <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleEditFaq(faq)} className="p-1 text-gray-400 hover:text-blue-500">
+                               <Edit size={16} />
+                            </button>
+                            <button onClick={() => {if(window.confirm('삭제하시겠습니까?')) deleteFaq(faq.id);}} className="p-1 text-gray-400 hover:text-red-500">
+                               <Trash2 size={16} />
+                            </button>
+                         </div>
+                       </div>
+                       <p className="text-sm text-gray-600 whitespace-pre-line">{faq.answer}</p>
+                     </div>
+                   ))}
+                   {faqs.length === 0 && <p className="text-gray-400 text-center py-8">등록된 FAQ가 없습니다.</p>}
+                 </div>
+               </div>
+             </div>
           )}
 
           {/* --- SITE SETTINGS TAB --- */}

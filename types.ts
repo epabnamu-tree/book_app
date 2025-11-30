@@ -49,6 +49,7 @@ export interface Comment {
   author: string;
   content: string;
   date: string;
+  password?: string; // Added for editing/deleting
 }
 
 export interface Resource {
@@ -62,6 +63,7 @@ export interface Resource {
 }
 
 export interface FaqItem {
+  id: string | number; // Added for management
   question: string;
   answer: string;
 }

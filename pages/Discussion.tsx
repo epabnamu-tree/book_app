@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { MessageSquare, Plus, Search, Tag, User, Trash2, ChevronDown, ChevronUp, Send, Edit2, Lock, X } from 'lucide-react';
+import { MessageSquare, Plus, Search, Tag, User, Trash2, ChevronDown, ChevronUp, Send, Edit2, Lock, X, Save } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Post, Comment } from '../types';
 
 const Discussion: React.FC = () => {
-  const { posts, addPost, updatePost, deletePost, addComment, isAdmin } = useData();
+  const { posts, addPost, updatePost, deletePost, addComment, updateComment, deleteComment, isAdmin } = useData();
   const [searchTerm, setSearchTerm] = useState("");
   const [showWriteForm, setShowWriteForm] = useState(false);
   const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
@@ -21,9 +21,19 @@ const Discussion: React.FC = () => {
   // Comment Form State
   const [commentAuthor, setCommentAuthor] = useState("");
   const [commentText, setCommentText] = useState("");
+  const [commentPassword, setCommentPassword] = useState("");
+
+  // Comment Edit State
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState("");
 
   // Auth Modal State
-  const [authModal, setAuthModal] = useState<{ isOpen: boolean, postId: number | null, action: 'edit' | 'delete' | null }>({
+  const [authModal, setAuthModal] = useState<{ 
+    isOpen: boolean, 
+    postId: number | null, 
+    commentId?: number,
+    action: 'edit' | 'delete' | 'edit-comment' | 'delete-comment' | null 
+  }>({
     isOpen: false, postId: null, action: null
   });
   const [authPasswordInput, setAuthPasswordInput] = useState("");
@@ -49,7 +59,8 @@ const Discussion: React.FC = () => {
     setContent(post.content);
     setAuthorName(post.author);
     setEmail(post.email || "");
-    setPassword(post.password || "");
+    // Force user to re-enter password for verification on save
+    setPassword(""); 
     setShowWriteForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -60,7 +71,7 @@ const Discussion: React.FC = () => {
     if (editPostId === postId) resetForm();
   };
 
-  // --- Action Handlers ---
+  // --- Action Handlers (Post) ---
 
   const handleEditClick = (post: Post) => {
     if (isAdmin) {
@@ -82,9 +93,31 @@ const Discussion: React.FC = () => {
     }
   };
 
+  // --- Action Handlers (Comment) ---
+  const handleCommentEditClick = (postId: number, comment: Comment) => {
+    if (isAdmin) {
+      setEditingCommentId(comment.id);
+      setEditCommentText(comment.content);
+    } else {
+      setAuthModal({ isOpen: true, postId: postId, commentId: comment.id, action: 'edit-comment' });
+      setAuthPasswordInput("");
+      setAuthError("");
+    }
+  }
+
+  const handleCommentDeleteClick = (postId: number, comment: Comment) => {
+     if (isAdmin) {
+        if(window.confirm("댓글을 삭제하시겠습니까?")) deleteComment(postId, comment.id);
+     } else {
+        setAuthModal({ isOpen: true, postId: postId, commentId: comment.id, action: 'delete-comment' });
+        setAuthPasswordInput("");
+        setAuthError("");
+     }
+  }
+
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { postId, action } = authModal;
+    const { postId, action, commentId } = authModal;
     if (!postId || !action) return;
 
     const targetPost = posts.find(p => p.id === postId);
@@ -93,17 +126,42 @@ const Discussion: React.FC = () => {
       return;
     }
 
-    if (targetPost.password === authPasswordInput) {
-      if (action === 'edit') {
-        startEditing(targetPost);
-      } else if (action === 'delete') {
-        if(window.confirm("정말로 삭제하시겠습니까?")) {
-           executeDelete(postId);
+    // Post Actions
+    if (action === 'edit' || action === 'delete') {
+      if (targetPost.password === authPasswordInput) {
+        if (action === 'edit') {
+          startEditing(targetPost);
+        } else if (action === 'delete') {
+          if(window.confirm("정말로 삭제하시겠습니까?")) {
+             executeDelete(postId);
+          }
         }
+        closeAuthModal();
+      } else {
+        setAuthError("비밀번호가 일치하지 않습니다.");
       }
-      closeAuthModal();
+      return;
+    }
+
+    // Comment Actions
+    const targetComment = targetPost.comments.find(c => c.id === commentId);
+    if (!targetComment) {
+        closeAuthModal();
+        return;
+    }
+
+    if (targetComment.password === authPasswordInput) {
+        if (action === 'edit-comment') {
+            setEditingCommentId(targetComment.id);
+            setEditCommentText(targetComment.content);
+        } else if (action === 'delete-comment') {
+            if(window.confirm("댓글을 삭제하시겠습니까?")) {
+                deleteComment(postId, targetComment.id);
+            }
+        }
+        closeAuthModal();
     } else {
-      setAuthError("비밀번호가 일치하지 않습니다.");
+        setAuthError("비밀번호가 일치하지 않습니다.");
     }
   };
 
@@ -140,6 +198,12 @@ const Discussion: React.FC = () => {
     } else if (formMode === 'edit' && editPostId) {
       const originalPost = posts.find(p => p.id === editPostId);
       if (originalPost) {
+        // Password verification for edit save
+        if (!isAdmin && password !== originalPost.password) {
+          alert("비밀번호가 일치하지 않습니다. 처음 등록했던 비밀번호를 입력해주세요.");
+          return;
+        }
+
         const updatedPost: Post = {
           ...originalPost,
           title, content, author: authorName, email, password
@@ -160,18 +224,29 @@ const Discussion: React.FC = () => {
 
   const handleCommentSubmit = (e: React.FormEvent, postId: number) => {
     e.preventDefault();
-    if (!commentText) return;
+    if (!commentText || !commentPassword) {
+        alert("댓글 내용과 비밀번호를 입력해주세요.");
+        return;
+    }
     
     const newComment: Comment = {
       id: Date.now(),
       author: commentAuthor || (isAdmin ? "이팝나무" : "익명"),
       content: commentText,
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      password: commentPassword
     };
 
     addComment(postId, newComment);
     setCommentText("");
     setCommentAuthor("");
+    setCommentPassword("");
+  };
+
+  const handleSaveCommentEdit = (postId: number, comment: Comment) => {
+      updateComment(postId, { ...comment, content: editCommentText });
+      setEditingCommentId(null);
+      setEditCommentText("");
   };
 
   // --- Filtering ---
@@ -264,6 +339,7 @@ const Discussion: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:border-secondary outline-none bg-white text-gray-900"
                     placeholder="숫자 4자리 권장"
                   />
+                  {formMode === 'edit' && <p className="text-xs text-secondary mt-1">수정을 완료하려면 원래 비밀번호를 입력해야 합니다.</p>}
                 </div>
               </div>
 
@@ -363,12 +439,41 @@ const Discussion: React.FC = () => {
                       <div className="space-y-3 mb-6">
                         {post.comments.length > 0 ? (
                            post.comments.map(comment => (
-                             <div key={comment.id} className="bg-white p-3 rounded-lg border border-gray-200 text-sm">
+                             <div key={comment.id} className="bg-white p-3 rounded-lg border border-gray-200 text-sm group">
                                <div className="flex justify-between mb-1">
                                  <span className="font-bold text-primary">{comment.author}</span>
-                                 <span className="text-xs text-gray-400">{comment.date}</span>
+                                 <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-400">{comment.date}</span>
+                                    {/* Comment Actions */}
+                                    <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                      <button onClick={() => handleCommentEditClick(post.id, comment)} className="text-blue-400 hover:text-blue-600">
+                                         <Edit2 size={12}/>
+                                      </button>
+                                      <button onClick={() => handleCommentDeleteClick(post.id, comment)} className="text-red-400 hover:text-red-600">
+                                         <Trash2 size={12}/>
+                                      </button>
+                                    </div>
+                                 </div>
                                </div>
-                               <p className="text-gray-700">{comment.content}</p>
+                               {editingCommentId === comment.id ? (
+                                 <div className="flex gap-2">
+                                    <input 
+                                      type="text" 
+                                      value={editCommentText}
+                                      onChange={(e) => setEditCommentText(e.target.value)}
+                                      className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-secondary bg-white text-gray-900"
+                                      autoFocus
+                                    />
+                                    <button onClick={() => handleSaveCommentEdit(post.id, comment)} className="p-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                        <Save size={16} />
+                                    </button>
+                                    <button onClick={() => setEditingCommentId(null)} className="p-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+                                        <X size={16} />
+                                    </button>
+                                 </div>
+                               ) : (
+                                 <p className="text-gray-700">{comment.content}</p>
+                               )}
                              </div>
                            ))
                         ) : (
@@ -378,20 +483,27 @@ const Discussion: React.FC = () => {
 
                       {/* Add Comment Form */}
                       <form onSubmit={(e) => handleCommentSubmit(e, post.id)} className="flex flex-col gap-2">
-                         <div className="flex gap-2">
+                         <div className="flex flex-wrap gap-2">
                            <input 
                               type="text" 
                               placeholder="이름 (생략가능)"
                               value={commentAuthor}
                               onChange={(e) => setCommentAuthor(e.target.value)}
-                              className="w-1/3 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-secondary text-gray-900"
+                              className="w-1/4 min-w-[100px] px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-secondary text-gray-900"
+                           />
+                           <input 
+                              type="password" 
+                              placeholder="비밀번호"
+                              value={commentPassword}
+                              onChange={(e) => setCommentPassword(e.target.value)}
+                              className="w-1/4 min-w-[100px] px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-secondary text-gray-900"
                            />
                            <input 
                               type="text" 
                               placeholder="댓글 내용을 입력하세요..."
                               value={commentText}
                               onChange={(e) => setCommentText(e.target.value)}
-                              className="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-secondary text-gray-900"
+                              className="flex-1 min-w-[200px] px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-secondary text-gray-900"
                            />
                            <button type="submit" className="p-2 bg-primary text-white rounded-lg hover:bg-gray-700">
                              <Send size={16} />
@@ -425,7 +537,7 @@ const Discussion: React.FC = () => {
               </button>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              {authModal.action === 'edit' ? '게시글을 수정하려면' : '게시글을 삭제하려면'} 작성 시 설정한 비밀번호를 입력하세요.
+              {authModal.action?.includes('delete') ? '삭제하려면' : '수정하려면'} 작성 시 설정한 비밀번호를 입력하세요.
             </p>
             <form onSubmit={handleAuthSubmit}>
               <input 

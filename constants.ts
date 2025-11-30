@@ -137,14 +137,16 @@ export const INITIAL_POSTS = [
       {
         "id": 1764518375229,
         "author": "익명",
-        "content": "안뇽 댓글",
-        "date": "2025-11-30"
+        "content": "안뇽 댓글 (비번:1234)",
+        "date": "2025-11-30",
+        "password": "1234"
       },
       {
         "id": 1764518387885,
         "author": "홍수아",
         "content": "또 안뇽",
-        "date": "2025-11-30"
+        "date": "2025-11-30",
+        "password": "1234"
       }
     ]
   },
@@ -166,7 +168,8 @@ export const INITIAL_POSTS = [
         "id": 101,
         "author": "현실주의자",
         "content": "실험 결과에 따르면 꼭 그렇지만은 않다고 합니다.",
-        "date": "2023-10-26"
+        "date": "2023-10-26",
+        "password": "123"
       }
     ]
   },
@@ -188,9 +191,7 @@ export const INITIAL_POSTS = [
 ];
 
 export const FAQS = [
-  { question: "강연 요청은 어떻게 하나요?", answer: "문의하기 페이지의 폼을 작성해주시거나 이메일로 연락 주시면 일정 확인 후 회신 드립니다." },
-  { question: "책 대량 구매 시 할인이 되나요?", answer: "네, 10권 이상 구매 시 출판사를 통해 할인 혜택을 안내해 드립니다." },
-  { question: "독서 모임 발제문은 어디서 구하나요?", answer: "자료실 메뉴에서 챕터별 토론 가이드북을 다운로드하실 수 있습니다." }
+  { id: 1, question: "강연 요청은 어떻게 하나요?", answer: "문의하기 페이지의 폼을 작성해주시거나 이메일로 연락 주시면 일정 확인 후 회신 드립니다." }
 ];
 
 export const CHAPTERS = [

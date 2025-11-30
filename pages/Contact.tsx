@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Mail, ChevronDown, ChevronUp, Send } from 'lucide-react';
-import { FAQS } from '../constants';
+import { useData } from '../context/DataContext';
 
 const Contact: React.FC = () => {
+  const { faqs } = useData();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   
   // We use standard form submission now
@@ -32,6 +33,7 @@ const Contact: React.FC = () => {
               action="https://formsubmit.co/epabnamu@gmail.com" 
               method="POST" 
               className="space-y-6"
+              target="_blank"
             >
               {/* Configuration Inputs */}
               <input type="hidden" name="_subject" value={`[이팝나무 문의] ${formData.name}님의 메시지`} />
@@ -76,7 +78,6 @@ const Contact: React.FC = () => {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-secondary bg-gray-50 text-gray-900"
                 >
                   <option>강연 요청</option>
-                  <option>대량 구매 문의</option>
                   <option>오탈자 제보</option>
                   <option>기타 문의</option>
                 </select>
@@ -101,16 +102,6 @@ const Contact: React.FC = () => {
               >
                 <Send size={18} /> 메시지 보내기
               </button>
-              <div className="text-xs text-gray-500 mt-4 leading-relaxed bg-gray-50 p-3 rounded border border-gray-200">
-                <p className="font-bold mb-1">📢 전송이 안 되나요?</p>
-                <p>
-                  이 기능은 <b>웹사이트가 배포되었거나 로컬 서버</b>에서 실행될 때만 작동합니다.<br/>
-                  HTML 파일을 직접 열어서 사용 중이시라면 오류가 발생할 수 있습니다.
-                </p>
-                <p className="mt-2 text-secondary">
-                  * <b>첫 전송 시</b> 입력하신 이메일로 <b>'Action Required'</b> 인증 메일이 발송됩니다. 꼭 <b>Activate</b> 버튼을 눌러주세요.
-                </p>
-              </div>
             </form>
           </div>
 
@@ -134,28 +125,32 @@ const Contact: React.FC = () => {
             <div>
               <h2 className="text-2xl font-bold font-serif text-primary mb-6">자주 묻는 질문 (FAQ)</h2>
               <div className="space-y-4">
-                {FAQS.map((faq, index) => (
-                  <div key={index} className="bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300">
-                    <button 
-                      onClick={() => toggleFaq(index)}
-                      className="w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none"
-                    >
-                      <span className={`font-medium ${openFaqIndex === index ? 'text-secondary' : 'text-primary'}`}>
-                        Q. {faq.question}
-                      </span>
-                      {openFaqIndex === index ? <ChevronUp size={18} className="text-gray-400"/> : <ChevronDown size={18} className="text-gray-400"/>}
-                    </button>
-                    <div 
-                      className={`px-6 overflow-hidden transition-all duration-300 ${
-                        openFaqIndex === index ? 'max-h-40 py-4 border-t border-gray-50' : 'max-h-0'
-                      }`}
-                    >
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        {faq.answer}
-                      </p>
+                {faqs.length === 0 ? (
+                  <p className="text-gray-500">등록된 FAQ가 없습니다.</p>
+                ) : (
+                  faqs.map((faq, index) => (
+                    <div key={faq.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300">
+                      <button 
+                        onClick={() => toggleFaq(index)}
+                        className="w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none"
+                      >
+                        <span className={`font-medium ${openFaqIndex === index ? 'text-secondary' : 'text-primary'}`}>
+                          Q. {faq.question}
+                        </span>
+                        {openFaqIndex === index ? <ChevronUp size={18} className="text-gray-400"/> : <ChevronDown size={18} className="text-gray-400"/>}
+                      </button>
+                      <div 
+                        className={`px-6 overflow-hidden transition-all duration-300 ${
+                          openFaqIndex === index ? 'max-h-40 py-4 border-t border-gray-50' : 'max-h-0'
+                        }`}
+                      >
+                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                          {faq.answer}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 

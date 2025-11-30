@@ -1,11 +1,12 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { Book, Post, Resource, Comment } from '../types';
-import { INITIAL_BOOKS, INITIAL_POSTS, INITIAL_RESOURCES, DEFAULT_ADMIN_PASSWORD, MASTER_KEY } from '../constants';
+import { Book, Post, Resource, Comment, FaqItem } from '../types';
+import { INITIAL_BOOKS, INITIAL_POSTS, INITIAL_RESOURCES, FAQS, DEFAULT_ADMIN_PASSWORD, MASTER_KEY } from '../constants';
 
 interface DataContextType {
   books: Book[];
   posts: Post[];
   resources: Resource[];
+  faqs: FaqItem[];
   isAdmin: boolean;
   authorProfileImage: string;
   login: (password: string) => boolean;
@@ -20,11 +21,16 @@ interface DataContextType {
   updatePost: (post: Post) => void;
   deletePost: (id: number) => void;
   addComment: (postId: number, comment: Comment) => void;
+  updateComment: (postId: number, comment: Comment) => void; // Added
   deleteComment: (postId: number, commentId: number) => void;
   // Resource Actions
   addResource: (resource: Resource) => void;
-  updateResource: (resource: Resource) => void; // Added
+  updateResource: (resource: Resource) => void;
   deleteResource: (id: number) => void;
+  // FAQ Actions
+  addFaq: (faq: FaqItem) => void;
+  updateFaq: (faq: FaqItem) => void;
+  deleteFaq: (id: number | string) => void;
   // Site Actions
   updateProfileImage: (url: string) => void;
 }
@@ -47,6 +53,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [books, setBooks] = useState<Book[]>(() => loadFromStorage('epabnamu_books', INITIAL_BOOKS));
   const [posts, setPosts] = useState<Post[]>(() => loadFromStorage('epabnamu_posts', INITIAL_POSTS));
   const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('epabnamu_resources', INITIAL_RESOURCES as Resource[]));
+  const [faqs, setFaqs] = useState<FaqItem[]>(() => loadFromStorage('epabnamu_faqs', FAQS));
   const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('epabnamu_profile_image', "https://loremflickr.com/800/600/meeting,team,office"));
   const [adminPassword, setAdminPassword] = useState<string>(() => loadFromStorage('epabnamu_admin_pw', DEFAULT_ADMIN_PASSWORD));
   
@@ -56,6 +63,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => { localStorage.setItem('epabnamu_books', JSON.stringify(books)); }, [books]);
   useEffect(() => { localStorage.setItem('epabnamu_posts', JSON.stringify(posts)); }, [posts]);
   useEffect(() => { localStorage.setItem('epabnamu_resources', JSON.stringify(resources)); }, [resources]);
+  useEffect(() => { localStorage.setItem('epabnamu_faqs', JSON.stringify(faqs)); }, [faqs]);
   useEffect(() => { localStorage.setItem('epabnamu_profile_image', JSON.stringify(authorProfileImage)); }, [authorProfileImage]);
   useEffect(() => { localStorage.setItem('epabnamu_admin_pw', JSON.stringify(adminPassword)); }, [adminPassword]);
 
@@ -119,6 +127,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
+  const updateComment = (postId: number, updatedComment: Comment) => {
+    setPosts(prevPosts => prevPosts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments.map(c => c.id === updatedComment.id ? updatedComment : c)
+        };
+      }
+      return post;
+    }));
+  };
+
   const deleteComment = (postId: number, commentId: number) => {
     setPosts(prevPosts => prevPosts.map(post => {
       if (post.id === postId) {
@@ -144,6 +164,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setResources(prev => prev.filter(r => r.id !== id));
   };
 
+  // FAQ CRUD
+  const addFaq = (faq: FaqItem) => {
+    setFaqs(prev => [...prev, faq]);
+  };
+
+  const updateFaq = (updatedFaq: FaqItem) => {
+    setFaqs(prev => prev.map(f => f.id === updatedFaq.id ? updatedFaq : f));
+  };
+
+  const deleteFaq = (id: number | string) => {
+    setFaqs(prev => prev.filter(f => f.id !== id));
+  };
+
   // Site Settings
   const updateProfileImage = (url: string) => {
     setAuthorProfileImage(url);
@@ -151,11 +184,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <DataContext.Provider value={{ 
-      books, posts, resources, isAdmin, authorProfileImage,
+      books, posts, resources, faqs, isAdmin, authorProfileImage,
       login, logout, changePassword,
       addBook, updateBook, deleteBook, 
-      addPost, updatePost, deletePost, addComment, deleteComment,
+      addPost, updatePost, deletePost, addComment, updateComment, deleteComment,
       addResource, updateResource, deleteResource,
+      addFaq, updateFaq, deleteFaq,
       updateProfileImage
     }}>
       {children}
