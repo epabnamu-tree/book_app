@@ -638,3 +638,71 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                 <div>
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
                     <Key size={20} className="text-secondary" /> 비밀번호 변경
+                  </h2>
+                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
+                    <form onSubmit={handleChangePassword} className="space-y-6">
+                       <p className="text-sm text-gray-600 mb-4">
+                         관리자 페이지 접속을 위한 비밀번호를 변경합니다.<br/>
+                         변경된 비밀번호는 현재 브라우저에 저장됩니다.
+                       </p>
+                       
+                       <div>
+                         <label className="block text-sm font-bold text-gray-700 mb-2">
+                           새로운 비밀번호
+                         </label>
+                         <input 
+                            type="text" 
+                            className="w-full px-4 py-3 border rounded-lg focus:border-secondary outline-none bg-white text-gray-900"
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="변경할 비밀번호 입력"
+                         />
+                       </div>
+
+                       <button type="submit" className="w-full py-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-black transition-colors flex justify-center items-center gap-2">
+                         <Save size={18} /> 비밀번호 변경하기
+                       </button>
+                       
+                       <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-100 text-xs text-yellow-800">
+                         <p className="font-bold mb-1">비밀번호를 잊으셨나요?</p>
+                         <p>로그인 화면의 '비밀번호를 잊으셨나요?' 버튼을 통해 초기화할 수 있습니다.</p>
+                       </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              {/* --- EXPORT DATA SECTION (MOVED HERE FOR VISIBILITY) --- */}
+              <div className="p-8 bg-gray-900 text-green-400 rounded-xl border border-gray-800 shadow-2xl">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                  <div>
+                     <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                       <Download size={24} className="text-green-500"/> 데이터 내보내기 (개발자용)
+                     </h3>
+                     <p className="text-gray-400 text-sm">
+                       여기서 수정한 데이터를 영구 저장하려면 아래 코드를 복사하세요.
+                     </p>
+                  </div>
+                  <button 
+                    onClick={() => { navigator.clipboard.writeText(exportCode); alert("코드가 클립보드에 복사되었습니다!"); }}
+                    className="px-6 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors shrink-0"
+                  >
+                    코드 복사하기
+                  </button>
+                </div>
+                <div className="bg-black p-4 rounded-lg overflow-x-auto max-h-60 border border-gray-700">
+                  <pre className="text-xs font-mono whitespace-pre-wrap">{exportCode}</pre>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default Admin;
