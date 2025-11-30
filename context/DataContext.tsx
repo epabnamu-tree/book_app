@@ -42,21 +42,21 @@ const loadFromStorage = <T,>(key: string, initialValue: T): T => {
 };
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize state from localStorage
-  const [books, setBooks] = useState<Book[]>(() => loadFromStorage('ipannamoo_books', INITIAL_BOOKS));
-  const [posts, setPosts] = useState<Post[]>(() => loadFromStorage('ipannamoo_posts', INITIAL_POSTS));
-  const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('ipannamoo_resources', INITIAL_RESOURCES));
-  const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('ipannamoo_profile_image', "https://loremflickr.com/800/600/meeting,team,office"));
-  const [adminPassword, setAdminPassword] = useState<string>(() => loadFromStorage('ipannamoo_admin_pw', DEFAULT_ADMIN_PASSWORD));
+  // Initialize state from localStorage (Using new keys for rebrand 'epabnamu')
+  const [books, setBooks] = useState<Book[]>(() => loadFromStorage('epabnamu_books', INITIAL_BOOKS));
+  const [posts, setPosts] = useState<Post[]>(() => loadFromStorage('epabnamu_posts', INITIAL_POSTS));
+  const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('epabnamu_resources', INITIAL_RESOURCES));
+  const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('epabnamu_profile_image', "https://loremflickr.com/800/600/meeting,team,office"));
+  const [adminPassword, setAdminPassword] = useState<string>(() => loadFromStorage('epabnamu_admin_pw', DEFAULT_ADMIN_PASSWORD));
   
   const [isAdmin, setIsAdmin] = useState(false); // Auth state remains in-memory for security
 
   // Persist data to localStorage whenever it changes
-  useEffect(() => { localStorage.setItem('ipannamoo_books', JSON.stringify(books)); }, [books]);
-  useEffect(() => { localStorage.setItem('ipannamoo_posts', JSON.stringify(posts)); }, [posts]);
-  useEffect(() => { localStorage.setItem('ipannamoo_resources', JSON.stringify(resources)); }, [resources]);
-  useEffect(() => { localStorage.setItem('ipannamoo_profile_image', JSON.stringify(authorProfileImage)); }, [authorProfileImage]);
-  useEffect(() => { localStorage.setItem('ipannamoo_admin_pw', JSON.stringify(adminPassword)); }, [adminPassword]);
+  useEffect(() => { localStorage.setItem('epabnamu_books', JSON.stringify(books)); }, [books]);
+  useEffect(() => { localStorage.setItem('epabnamu_posts', JSON.stringify(posts)); }, [posts]);
+  useEffect(() => { localStorage.setItem('epabnamu_resources', JSON.stringify(resources)); }, [resources]);
+  useEffect(() => { localStorage.setItem('epabnamu_profile_image', JSON.stringify(authorProfileImage)); }, [authorProfileImage]);
+  useEffect(() => { localStorage.setItem('epabnamu_admin_pw', JSON.stringify(adminPassword)); }, [adminPassword]);
 
   const login = (inputPassword: string) => {
     // Normal Login

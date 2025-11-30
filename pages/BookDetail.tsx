@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { ShoppingCart, BookOpen, Check, ArrowLeft, Download, Users, FileText, Star, AlignLeft } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Download, Users, FileText, Star, AlignLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 const BookDetail: React.FC = () => {
@@ -81,7 +81,7 @@ const BookDetail: React.FC = () => {
                   <ShoppingCart size={18} /> 구매하기
                 </a>
                 <Link to="/discussion" className="flex-1 py-3.5 px-6 bg-white border border-gray-300 text-primary rounded-lg font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                  <Users size={18} /> 독자 토론장
+                  <Users size={18} /> 토론방
                 </Link>
                 <Link to="/resources" className="flex-1 py-3.5 px-6 bg-white border border-gray-300 text-primary rounded-lg font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                   <Download size={18} /> 부록 다운로드

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Book as BookIcon, MessageSquare, Trash2, Edit, Save, X, FileText, Download, MoreVertical, Link as LinkIcon, Settings, Image, Key, RefreshCcw } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource } from '../types';
-import { MASTER_KEY } from '../constants';
 
 // Helper to convert Google Drive share links to direct image links
 const convertGoogleDriveLink = (url: string) => {
@@ -14,6 +13,34 @@ const convertGoogleDriveLink = (url: string) => {
   if (idMatch && idMatch[1]) {
     return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
   }
+  return url;
+};
+
+// Helper to convert Imgur standard links to direct image links
+const getDirectImageUrl = (url: string) => {
+  if (!url) return "";
+  
+  // 1. Google Drive Conversion
+  const driveLink = convertGoogleDriveLink(url);
+  if (driveLink !== url) return driveLink;
+
+  // 2. Imgur Conversion
+  if (url.includes('imgur.com')) {
+    // If it's already a direct link, leave it
+    if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) return url;
+    
+    // Check for Album links (unsupported for auto-convert usually)
+    if (url.includes('/a/') || url.includes('/gallery/')) {
+        return "ERROR_ALBUM";
+    }
+
+    // Convert standard post link to .jpg (imgur.com/ID -> i.imgur.com/ID.jpg)
+    const idMatch = url.match(/imgur\.com\/([a-zA-Z0-9]+)/);
+    if (idMatch && idMatch[1]) {
+        return `https://i.imgur.com/${idMatch[1]}.jpg`;
+    }
+  }
+
   return url;
 };
 
@@ -48,10 +75,12 @@ const Admin: React.FC = () => {
 
   // --- Site Settings State ---
   const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
 
   useEffect(() => {
     setProfileImageUrl(authorProfileImage);
+    setPreviewUrl(authorProfileImage);
   }, [authorProfileImage]);
 
   // Update export code whenever data changes
@@ -112,7 +141,11 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
     const currentTags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
     
     // Auto-convert Google Drive Links for Cover URL
-    const processedCoverUrl = convertGoogleDriveLink(bookForm.coverUrl || "");
+    const processedCoverUrl = getDirectImageUrl(bookForm.coverUrl || "");
+    if (processedCoverUrl === "ERROR_ALBUM") {
+        alert("Imgur 앨범 링크는 사용할 수 없습니다. 이미지 위에서 우클릭하여 주소를 복사해주세요.");
+        return;
+    }
 
     const bookData: Book = {
       ...bookForm as Book,
@@ -156,13 +189,27 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
   };
 
   // --- Site Actions ---
+  const handleProfileImageChange = (val: string) => {
+      setProfileImageUrl(val);
+      const direct = getDirectImageUrl(val);
+      if (direct !== "ERROR_ALBUM") {
+          setPreviewUrl(direct);
+      }
+  }
+
   const handleSaveSiteSettings = (e: React.FormEvent) => {
     e.preventDefault();
     // Auto-convert Google Drive Links
-    const processedUrl = convertGoogleDriveLink(profileImageUrl);
+    const processedUrl = getDirectImageUrl(profileImageUrl);
     
+    if (processedUrl === "ERROR_ALBUM") {
+        alert("Imgur 앨범 링크는 사용할 수 없습니다.");
+        return;
+    }
+
     updateProfileImage(processedUrl);
     setProfileImageUrl(processedUrl); // Update state to show the converted URL
+    setPreviewUrl(processedUrl);
     
     alert("사이트 설정이 저장되었습니다.");
   };
@@ -326,7 +373,7 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                         <label className="block text-xs font-bold text-gray-500 mb-1">이미지 URL</label>
                         <input type="text" className="w-full px-3 py-2 border rounded-lg focus:border-secondary outline-none bg-white text-gray-900"
                           value={bookForm.coverUrl} onChange={(e) => setBookForm({...bookForm, coverUrl: e.target.value})} />
-                        <p className="text-[10px] text-gray-400 mt-1">* 구글 드라이브 공유 링크를 입력하면 자동으로 변환됩니다.</p>
+                        <p className="text-[10px] text-gray-400 mt-1">* 구글 드라이브/Imgur 링크 자동 변환</p>
                      </div>
                      <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1">구매 링크 URL</label>
@@ -604,7 +651,7 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                     <form onSubmit={handleSaveSiteSettings} className="space-y-6">
                       <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-200">
                         <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
-                          <img src={profileImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                          <img src={previewUrl} onError={() => setPreviewUrl("https://placehold.co/200x200?text=Error")} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-sm text-gray-500">메인 화면 미리보기</span>
                       </div>
@@ -618,13 +665,14 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                               type="text" 
                               className="flex-1 px-4 py-3 border rounded-lg focus:border-secondary outline-none bg-white text-gray-900"
                               value={profileImageUrl}
-                              onChange={(e) => setProfileImageUrl(e.target.value)}
+                              onChange={(e) => handleProfileImageChange(e.target.value)}
                               placeholder="https://..."
                            />
-                           <button type="button" onClick={() => setProfileImageUrl("https://loremflickr.com/800/800/writer,portrait,man")} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm">
+                           <button type="button" onClick={() => handleProfileImageChange("https://loremflickr.com/800/800/writer,portrait,man")} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm">
                              기본값
                            </button>
                         </div>
+                        {profileImageUrl.includes('imgur.com/a/') && <p className="text-xs text-red-500 mt-1 font-bold">Imgur 앨범 링크는 사용할 수 없습니다. 이미지 우클릭 → 주소 복사를 이용하세요.</p>}
                       </div>
 
                       <button type="submit" className="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-[#1a252f] transition-colors flex justify-center items-center gap-2">

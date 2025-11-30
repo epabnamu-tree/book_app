@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, Download, Users, Mail, Book, UserCog } from 'lucide-react';
+import { Menu, X, BookOpen, Download, Users, Mail, UserCog } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,8 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navLinks = [
     { path: '/', label: '이팝나무의 서재', icon: <BookOpen size={18} /> },
-    // { path: '/books', label: '출간 도서', icon: <Book size={18} /> }, // Integrated into Home
-    { path: '/discussion', label: '독자 토론장', icon: <Users size={18} /> },
+    { path: '/discussion', label: '토론방', icon: <Users size={18} /> },
     { path: '/resources', label: '자료실', icon: <Download size={18} /> },
     { path: '/contact', label: '문의하기', icon: <Mail size={18} /> },
   ];
@@ -96,17 +94,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="font-serif font-bold text-xl text-white mb-4">연구그룹 이팝나무</h3>
-              <p className="text-sm leading-relaxed opacity-80">
-                미래를 읽는 통찰, 따뜻한 경제학.<br />
-                이팝나무의 공식 홈페이지입니다.
-              </p>
+              {/* Description text removed as requested */}
             </div>
             <div>
               <h4 className="font-bold text-white mb-4">Site Map</h4>
               <ul className="space-y-2 text-sm opacity-80">
                 <li><Link to="/about" className="hover:text-secondary">연구그룹 이팝나무 소개</Link></li>
                 <li><Link to="/resources" className="hover:text-secondary">자료실</Link></li>
-                <li><Link to="/contact" className="hover:text-secondary">강연 요청</Link></li>
+                <li><Link to="/contact" className="hover:text-secondary">강연요청 · 문의</Link></li>
               </ul>
             </div>
             <div>
@@ -120,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs opacity-60">
-              © 2024 Research Group Ipannamoo. All rights reserved.
+              © 2025 Research Group Epabnamu. All rights reserved.
             </p>
             <Link to="/admin" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-secondary text-gray-200 text-xs transition-all flex items-center gap-2 border border-white/10">
               <UserCog size={14} /> 관리자 페이지

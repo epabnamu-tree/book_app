@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Book, PenTool, Mic, ChevronRight } from 'lucide-react';
@@ -17,7 +16,7 @@ const Home: React.FC = () => {
           {/* Text Content */}
           <div className="flex-1 space-y-8 text-center md:text-left">
             <div>
-              <span className="text-secondary font-bold tracking-widest text-xs md:text-sm uppercase mb-2 block">Research Group Ipannamoo</span>
+              <span className="text-secondary font-bold tracking-widest text-xs md:text-sm uppercase mb-2 block">Research Group Epabnamu</span>
               <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary leading-[1.2]">
                 기술의 진보와 인간의 삶,<br />
                 <span className="relative inline-block mt-2">
@@ -33,9 +32,7 @@ const Home: React.FC = () => {
               공정하게 흐르는 세상을 꿈꿉니다.
             </p>
             <div className="pt-4 flex justify-center md:justify-start gap-4">
-               <a href="#book-list" className="px-8 py-3.5 bg-primary text-white rounded-lg font-bold hover:bg-[#1a252f] transition-all shadow-lg hover:shadow-xl flex items-center gap-3 transform hover:-translate-y-0.5">
-                 집필 도서 보기 <ArrowRight size={18} />
-               </a>
+               {/* Button removed as requested */}
                <Link to="/about" className="px-8 py-3.5 bg-white border border-gray-200 text-primary rounded-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow flex items-center gap-3">
                  소개 더 보기
                </Link>
@@ -53,15 +50,10 @@ const Home: React.FC = () => {
                 <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/50 bg-white">
                   <img 
                     src={authorProfileImage} 
-                    alt="Research Group Ipannamoo" 
+                    alt="Research Group Epabnamu" 
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  {/* Overlay Caption */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-90 flex flex-col justify-end p-8">
-                     <span className="text-secondary font-bold text-sm tracking-wider uppercase mb-1">Since 2023</span>
-                     <h3 className="text-white font-serif font-bold text-2xl">연구그룹 이팝나무</h3>
-                     <p className="text-gray-300 text-sm mt-1">Human-Centered Tech & Economy</p>
-                  </div>
+                  {/* Overlay text removed as requested */}
                 </div>
              </div>
           </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useData } from '../context/DataContext';
 
@@ -11,7 +10,7 @@ const About: React.FC = () => {
         
         {/* Header */}
         <div className="text-center mb-16 animate-fade-in-up">
-          <span className="text-secondary font-bold tracking-widest text-sm uppercase mb-3 block">Research Group Ipannamoo</span>
+          <span className="text-secondary font-bold tracking-widest text-sm uppercase mb-3 block">Research Group Epabnamu</span>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary leading-tight">
             연구그룹 이팝나무 소개
           </h1>
@@ -22,7 +21,7 @@ const About: React.FC = () => {
           <div className="relative h-64 md:h-80 bg-gray-100 overflow-hidden">
             <img 
               src={authorProfileImage} 
-              alt="Research Group Ipannamoo" 
+              alt="Research Group Epabnamu" 
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">

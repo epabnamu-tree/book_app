@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MessageSquare, Plus, Search, Tag, User, Trash2, ChevronDown, ChevronUp, Send, Edit2, Lock, X } from 'lucide-react';
 import { useData } from '../context/DataContext';
@@ -188,7 +187,7 @@ const Discussion: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-primary">독자 토론장</h1>
+            <h1 className="text-3xl font-serif font-bold text-primary">토론방</h1>
             <p className="text-gray-600 mt-2">이팝나무의 모든 책에 대해 자유롭게 의견을 나누세요.</p>
           </div>
           <button 

@@ -3,7 +3,7 @@ import { Book, Review, Post, Resource, FaqItem } from './types';
 export const APP_NAME = "이팝나무의 서재";
 
 export const DEFAULT_ADMIN_PASSWORD = "admin123";
-export const MASTER_KEY = "ipannamoo2024!";
+export const MASTER_KEY = "epabnamu2025!";
 
 export const INITIAL_BOOKS: Book[] = [
   {
