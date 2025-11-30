@@ -2,7 +2,7 @@
 // 이 파일은 관리자 페이지의 [데이터 내보내기] 기능을 통해 생성된 코드 혹은 초기 데이터입니다.
 
 export const APP_NAME = "이팝나무의 서재";
-export const DEFAULT_ADMIN_PASSWORD = "admin123";
+export const DEFAULT_ADMIN_PASSWORD = "slit0800@@";
 export const MASTER_KEY = "ipannamoo2024!";
 
 export const INITIAL_BOOKS = [

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
@@ -96,7 +97,7 @@ const Admin: React.FC = () => {
 // constants.ts 파일의 내용을 아래 코드로 교체하세요.
 
 export const APP_NAME = "이팝나무의 서재";
-export const DEFAULT_ADMIN_PASSWORD = "admin123";
+export const DEFAULT_ADMIN_PASSWORD = "slit0800@@";
 export const MASTER_KEY = "ipannamoo2024!";
 
 export const INITIAL_BOOKS = ${JSON.stringify(books, null, 2)};
@@ -327,7 +328,6 @@ export const CHAPTERS = [
               로그인
             </button>
             <div className="text-center mt-6 p-4 bg-gray-50 rounded text-xs text-gray-500">
-              <p>초기 비밀번호: <b>admin123</b></p>
               <button 
                 type="button"
                 onClick={handleResetPassword}

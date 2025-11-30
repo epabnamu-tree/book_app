@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, Download, Users, Mail, UserCog } from 'lucide-react';
+import { Menu, X, BookOpen, Download, Users, Mail, UserCog, Facebook } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -94,35 +94,58 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary text-gray-300 py-12">
+      <footer className="bg-primary text-gray-300 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-serif font-bold text-xl text-white mb-4">연구그룹 이팝나무</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 border-b border-white/10 pb-12">
+            
+            {/* Logo Section (Span 2 cols on tablet/desktop for better spacing) */}
+            <div className="md:col-span-2 flex flex-col items-start justify-center">
+              <img 
+                src="https://i.imgur.com/qNKF9V9.png" 
+                alt="연구그룹 이팝나무" 
+                className="h-16 w-auto mb-4 opacity-90 hover:opacity-100 transition-opacity" 
+              />
+              <p className="text-sm opacity-60 font-light max-w-sm">
+                기술의 진보와 인간 삶의 조화로운 공존을 연구합니다.<br/>
+                모두를 위한 따뜻한 기술과 경제를 꿈꿉니다.
+              </p>
             </div>
+
+            {/* Site Map */}
             <div>
-              <h4 className="font-bold text-white mb-4">Site Map</h4>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li><Link to="/about" className="hover:text-secondary">연구그룹 이팝나무 소개</Link></li>
-                <li><Link to="/resources" className="hover:text-secondary">자료실</Link></li>
-                <li><Link to="/contact" className="hover:text-secondary">강연요청 · 문의</Link></li>
+              <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Site Map</h4>
+              <ul className="space-y-3 text-sm opacity-80">
+                <li><Link to="/about" className="hover:text-secondary transition-colors">연구그룹 이팝나무 소개</Link></li>
+                <li><Link to="/library" className="hover:text-secondary transition-colors">이팝나무의 서재</Link></li>
+                <li><Link to="/resources" className="hover:text-secondary transition-colors">자료실</Link></li>
+                <li><Link to="/contact" className="hover:text-secondary transition-colors">강연요청 · 문의</Link></li>
               </ul>
             </div>
+
+            {/* Connect */}
             <div>
-              <h4 className="font-bold text-white mb-4">Connect</h4>
+              <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Connect</h4>
               <div className="flex space-x-4">
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors">B</a>
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors">T</a>
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors">I</a>
+                <a 
+                  href="https://www.facebook.com/epabnamu.org" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-all duration-300 group"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} className="group-hover:scale-110 transition-transform"/>
+                </a>
               </div>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs opacity-60">
+
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60 font-light">
+            <p>
               © 2025 Research Group Epabnamu. All rights reserved.
             </p>
-            <Link to="/admin" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-secondary text-gray-200 text-xs transition-all flex items-center gap-2 border border-white/10">
-              <UserCog size={14} /> 관리자 페이지
+            <Link to="/admin" className="flex items-center gap-1 hover:text-secondary transition-colors">
+              <UserCog size={12} /> 관리자 페이지
             </Link>
           </div>
         </div>
