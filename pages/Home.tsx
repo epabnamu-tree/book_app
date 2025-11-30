@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Book, PenTool, Mic, ChevronRight } from 'lucide-react';
+import { PenTool, Mic, ChevronRight, Book as BookIcon } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 const Home: React.FC = () => {
   const { books, authorProfileImage } = useData();
+  const [rotatingIndex, setRotatingIndex] = useState(0);
+
+  // Logic to determine which books to show
+  // We want 2 pinned books and 1 rotating book from the "rest"
+  const pinnedBooks = books.filter(b => b.isPinned).slice(0, 2);
+  const otherBooks = books.filter(b => !pinnedBooks.includes(b));
+
+  // Carousel Logic
+  useEffect(() => {
+    if (otherBooks.length <= 1) return;
+    const interval = setInterval(() => {
+      setRotatingIndex(prev => (prev + 1) % otherBooks.length);
+    }, 5000); // 5 seconds interval
+    return () => clearInterval(interval);
+  }, [otherBooks.length]);
+
+  const currentRotatingBook = otherBooks.length > 0 ? otherBooks[rotatingIndex] : null;
+
+  // Compile the display list: 2 Pinned + 1 Rotating (if available)
+  const displayBooks = [...pinnedBooks];
+  if (currentRotatingBook) {
+    displayBooks.push(currentRotatingBook);
+  }
 
   return (
     <div className="flex flex-col gap-0">
@@ -17,9 +40,9 @@ const Home: React.FC = () => {
           <div className="flex-1 space-y-8 text-center md:text-left">
             <div>
               <span className="text-secondary font-bold tracking-widest text-xs md:text-sm uppercase mb-2 block">Research Group Epabnamu</span>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary leading-[1.2]">
-                기술의 진보와 인간의 삶,<br />
-                <span className="relative inline-block mt-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-primary">
+                <span className="block mb-2 md:mb-4 leading-snug">기술의 진보와 인간의 삶,</span>
+                <span className="relative inline-block leading-snug">
                   <span className="relative z-10">조화로운 공존을 탐구하다</span>
                   <span className="absolute bottom-2 left-0 w-full h-4 bg-secondary/20 -z-0 rounded-sm"></span>
                 </span>
@@ -32,7 +55,6 @@ const Home: React.FC = () => {
               공정하게 흐르는 세상을 꿈꿉니다.
             </p>
             <div className="pt-4 flex justify-center md:justify-start gap-4">
-               {/* Button removed as requested */}
                <Link to="/about" className="px-8 py-3.5 bg-white border border-gray-200 text-primary rounded-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow flex items-center gap-3">
                  소개 더 보기
                </Link>
@@ -53,24 +75,23 @@ const Home: React.FC = () => {
                     alt="Research Group Epabnamu" 
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  {/* Overlay text removed as requested */}
                 </div>
              </div>
           </div>
         </div>
       </section>
 
-      {/* Book Gallery Section */}
+      {/* Book Gallery Section (3 Books: 2 Pinned + 1 Rotating) */}
       <section id="book-list" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">출간 도서</h2>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">대표 도서</h2>
             <p className="text-gray-500">이팝나무의 통찰이 담긴 저서들을 만나보세요.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {books.map((book) => (
-              <div key={book.id} className="group cursor-pointer">
+            {displayBooks.map((book) => (
+              <div key={book.id} className="group cursor-pointer animate-fade-in">
                 <Link to={`/book/${book.id}`} className="block h-full">
                   <div className="relative aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg mb-6 transform transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl border border-gray-100">
                     <img 
@@ -86,9 +107,16 @@ const Home: React.FC = () => {
                   </div>
                   <div className="flex flex-col h-full">
                     <div className="flex gap-2 mb-2">
-                      {book.tags.slice(0, 2).map(tag => (
-                        <span key={tag} className="text-xs font-bold text-secondary uppercase tracking-wider">{tag}</span>
-                      ))}
+                       {/* Show Category if available, otherwise tag */}
+                       {book.category ? (
+                         <span className="text-xs font-bold text-secondary uppercase tracking-wider border border-secondary/20 px-2 py-0.5 rounded">
+                           {book.category}
+                         </span>
+                       ) : (
+                         book.tags.slice(0, 1).map(tag => (
+                           <span key={tag} className="text-xs font-bold text-secondary uppercase tracking-wider">{tag}</span>
+                         ))
+                       )}
                     </div>
                     <h3 className="text-xl font-bold font-serif text-primary mb-1 group-hover:text-secondary transition-colors">{book.title}</h3>
                     <p className="text-sm text-gray-500 mb-3">{book.subtitle}</p>
@@ -100,12 +128,14 @@ const Home: React.FC = () => {
               </div>
             ))}
             
-            {/* Coming Soon Card */}
-            <div className="flex flex-col items-center justify-center aspect-[2/3] bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-400 p-8 text-center hover:border-gray-300 transition-colors">
-              <Book size={48} className="mb-4 opacity-30" />
-              <h3 className="text-lg font-bold mb-2">Next Book</h3>
-              <p className="text-sm">디지털 휴머니즘을 주제로<br/>연구 및 집필 중입니다.</p>
-            </div>
+            {/* If we have fewer than 3 books total, fill space with a placeholder */}
+            {displayBooks.length < 3 && (
+              <div className="flex flex-col items-center justify-center aspect-[2/3] bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-400 p-8 text-center hover:border-gray-300 transition-colors">
+                 <BookIcon size={48} className="mb-4 opacity-30" />
+                 <h3 className="text-lg font-bold mb-2">Next Book</h3>
+                 <p className="text-sm">디지털 휴머니즘을 주제로<br/>연구 및 집필 중입니다.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

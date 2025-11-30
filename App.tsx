@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -9,6 +8,7 @@ import Discussion from './pages/Discussion';
 import Resources from './pages/Resources';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import Library from './pages/Library';
 import { DataProvider } from './context/DataContext';
 
 const App: React.FC = () => {
@@ -19,9 +19,10 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/library" element={<Library />} />
             {/* Dynamic Route for Books */}
             <Route path="/book/:id" element={<BookDetail />} />
-            {/* Backward compatibility if someone bookmarked the old link, though BookDetail handles logic */}
+            {/* Backward compatibility */}
             <Route path="/book-info" element={<Home />} /> 
             
             <Route path="/discussion" element={<Discussion />} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, BookOpen, Download, Users, Mail, UserCog } from 'lucide-react';
 
@@ -10,8 +10,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
+  // Scroll to top whenever the route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const navLinks = [
-    { path: '/', label: '이팝나무의 서재', icon: <BookOpen size={18} /> },
+    { path: '/library', label: '이팝나무의 서재', icon: <BookOpen size={18} /> },
     { path: '/discussion', label: '토론방', icon: <Users size={18} /> },
     { path: '/resources', label: '자료실', icon: <Download size={18} /> },
     { path: '/contact', label: '문의하기', icon: <Mail size={18} /> },
@@ -94,7 +99,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="font-serif font-bold text-xl text-white mb-4">연구그룹 이팝나무</h3>
-              {/* Description text removed as requested */}
             </div>
             <div>
               <h4 className="font-bold text-white mb-4">Site Map</h4>

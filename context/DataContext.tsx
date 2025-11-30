@@ -23,6 +23,7 @@ interface DataContextType {
   deleteComment: (postId: number, commentId: number) => void;
   // Resource Actions
   addResource: (resource: Resource) => void;
+  updateResource: (resource: Resource) => void; // Added
   deleteResource: (id: number) => void;
   // Site Actions
   updateProfileImage: (url: string) => void;
@@ -45,7 +46,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Initialize state from localStorage (Using new keys for rebrand 'epabnamu')
   const [books, setBooks] = useState<Book[]>(() => loadFromStorage('epabnamu_books', INITIAL_BOOKS));
   const [posts, setPosts] = useState<Post[]>(() => loadFromStorage('epabnamu_posts', INITIAL_POSTS));
-  const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('epabnamu_resources', INITIAL_RESOURCES));
+  const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('epabnamu_resources', INITIAL_RESOURCES as Resource[]));
   const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('epabnamu_profile_image', "https://loremflickr.com/800/600/meeting,team,office"));
   const [adminPassword, setAdminPassword] = useState<string>(() => loadFromStorage('epabnamu_admin_pw', DEFAULT_ADMIN_PASSWORD));
   
@@ -135,6 +136,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setResources(prev => [...prev, resource]);
   };
 
+  const updateResource = (updatedResource: Resource) => {
+    setResources(prev => prev.map(r => r.id === updatedResource.id ? updatedResource : r));
+  };
+
   const deleteResource = (id: number) => {
     setResources(prev => prev.filter(r => r.id !== id));
   };
@@ -150,7 +155,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       login, logout, changePassword,
       addBook, updateBook, deleteBook, 
       addPost, updatePost, deletePost, addComment, deleteComment,
-      addResource, deleteResource,
+      addResource, updateResource, deleteResource,
       updateProfileImage
     }}>
       {children}

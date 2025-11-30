@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource } from '../types';
 
@@ -49,7 +49,7 @@ const Admin: React.FC = () => {
     isAdmin, login, logout, changePassword,
     books, addBook, updateBook, deleteBook,
     posts, deleteComment, deletePost,
-    resources, addResource, deleteResource,
+    resources, addResource, updateResource, deleteResource,
     authorProfileImage, updateProfileImage
   } = useData();
 
@@ -65,10 +65,11 @@ const Admin: React.FC = () => {
   const [tagsInput, setTagsInput] = useState("");
   const [bookForm, setBookForm] = useState<Partial<Book>>({
     title: "", subtitle: "", description: "", publisher: "", coverUrl: "", purchaseUrl: "", tags: [], 
-    authorNote: "", reviewsText: "", tableOfContents: ""
+    authorNote: "", reviewsText: "", tableOfContents: "", category: "", isPinned: false
   });
 
   // --- Resource State ---
+  const [isEditingResource, setIsEditingResource] = useState<number | null>(null);
   const [resourceForm, setResourceForm] = useState<Partial<Resource>>({
     title: "", type: "PDF", description: "", url: "", size: "", bookId: ""
   });
@@ -85,14 +86,31 @@ const Admin: React.FC = () => {
 
   // Update export code whenever data changes
   useEffect(() => {
+    // We must export ALL constants, not just the dynamic ones, otherwise copy-pasting will break imports.
     const code = `
 // constants.ts 파일의 내용을 아래 코드로 교체하세요.
+
+export const APP_NAME = "이팝나무의 서재";
+export const DEFAULT_ADMIN_PASSWORD = "admin123";
+export const MASTER_KEY = "ipannamoo2024!";
 
 export const INITIAL_BOOKS = ${JSON.stringify(books, null, 2)};
 
 export const INITIAL_RESOURCES = ${JSON.stringify(resources, null, 2)};
 
 export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
+
+export const FAQS = [
+  { question: "강연 요청은 어떻게 하나요?", answer: "문의하기 페이지의 폼을 작성해주시거나 이메일로 연락 주시면 일정 확인 후 회신 드립니다." },
+  { question: "책 대량 구매 시 할인이 되나요?", answer: "네, 10권 이상 구매 시 출판사를 통해 할인 혜택을 안내해 드립니다." },
+  { question: "독서 모임 발제문은 어디서 구하나요?", answer: "자료실 메뉴에서 챕터별 토론 가이드북을 다운로드하실 수 있습니다." }
+];
+
+export const CHAPTERS = [
+  { id: 1, title: "1장. AI의 도래", description: "인공지능이 가져올 노동의 변화" },
+  { id: 2, title: "2장. 기본소득", description: "새로운 사회 안전망의 필요성" },
+  { id: 3, title: "3장. 사회적 경제", description: "경쟁을 넘어선 연대" }
+];
     `;
     setExportCode(code);
   }, [books, resources, posts]);
@@ -121,7 +139,8 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
       title: "", subtitle: "", description: "", publisher: "", 
       coverUrl: "https://loremflickr.com/600/900/book,cover,abstract", 
       purchaseUrl: "", tags: [], 
-      authorNote: "", reviewsText: "", tableOfContents: ""
+      authorNote: "", reviewsText: "", tableOfContents: "",
+      category: "", isPinned: false
     });
     setTagsInput("");
     setIsEditingBook(null);
@@ -167,15 +186,26 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
   };
 
   // --- Resource Actions ---
-  const handleAddResource = (e: React.FormEvent) => {
+  const resetResourceForm = () => {
+    setResourceForm({ title: "", type: "PDF", description: "", url: "", size: "", bookId: "" });
+    setIsEditingResource(null);
+  };
+
+  const handleEditResource = (res: Resource) => {
+    setIsEditingResource(res.id);
+    setResourceForm(res);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const handleSaveResource = (e: React.FormEvent) => {
     e.preventDefault();
     if (!resourceForm.title || !resourceForm.bookId || !resourceForm.url) {
       alert("관련 도서, 제목, 링크 URL은 필수 항목입니다.");
       return;
     }
 
-    const newResource: Resource = {
-      id: Date.now(),
+    const resourceData: Resource = {
+      id: isEditingResource || Date.now(),
       title: resourceForm.title!,
       type: resourceForm.type as 'PDF' | 'ZIP' | 'LINK',
       description: resourceForm.description || "",
@@ -183,9 +213,16 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
       size: resourceForm.size || "Link",
       bookId: resourceForm.bookId
     };
-    addResource(newResource);
-    setResourceForm({ title: "", type: "PDF", description: "", url: "", size: "", bookId: "" });
-    alert("자료가 등록되었습니다.");
+
+    if (isEditingResource) {
+      updateResource(resourceData);
+      alert("자료가 수정되었습니다.");
+    } else {
+      addResource(resourceData);
+      alert("자료가 등록되었습니다.");
+    }
+    
+    resetResourceForm();
   };
 
   // --- Site Actions ---
@@ -276,7 +313,7 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
         
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-serif font-bold text-primary">관리자 CMS</h1>
+          <h1 className="text-3xl font-serif font-bold text-primary">관리자 CMS (Epabnamu)</h1>
           <button onClick={logout} className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
             <LogOut size={16} /> 로그아웃
           </button>
@@ -348,6 +385,31 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                             placeholder="2024.01.01"
                             value={bookForm.publishDate} onChange={(e) => setBookForm({...bookForm, publishDate: e.target.value})} />
                         </div>
+                     </div>
+                     <div className="grid grid-cols-2 gap-2">
+                       <div>
+                         <label className="block text-xs font-bold text-gray-500 mb-1">분야/시리즈 (Category)</label>
+                         <input 
+                           type="text" 
+                           className="w-full px-3 py-2 border rounded-lg focus:border-secondary outline-none bg-white text-gray-900"
+                           placeholder="경제학, 사회과학 등"
+                           value={bookForm.category || ""} 
+                           onChange={(e) => setBookForm({...bookForm, category: e.target.value})} 
+                         />
+                       </div>
+                       <div className="flex items-center pt-5">
+                         <label className="flex items-center gap-2 cursor-pointer">
+                           <input 
+                             type="checkbox" 
+                             checked={bookForm.isPinned || false}
+                             onChange={(e) => setBookForm({...bookForm, isPinned: e.target.checked})}
+                             className="w-5 h-5 accent-secondary"
+                           />
+                           <span className="text-sm font-bold text-primary flex items-center gap-1">
+                             <Pin size={14} className="text-secondary"/> 메인 페이지 고정
+                           </span>
+                         </label>
+                       </div>
                      </div>
                      <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1">태그 (쉼표로 구분)</label>
@@ -426,7 +488,12 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                 <h2 className="text-xl font-bold mb-6 text-primary">등록된 도서 목록 ({books.length})</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {books.map(book => (
-                    <div key={book.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+                    <div key={book.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group relative">
+                      {book.isPinned && (
+                        <div className="absolute top-2 right-2 z-10 bg-secondary text-white p-1 rounded-full shadow-lg">
+                          <Pin size={12} fill="currentColor" />
+                        </div>
+                      )}
                       <div className="h-40 w-full overflow-hidden bg-gray-100 relative">
                         <img 
                           src={book.coverUrl} 
@@ -436,7 +503,8 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                       </div>
                       <div className="p-4 flex flex-col flex-1">
                           <h3 className="font-bold text-md text-primary truncate mb-1" title={book.title}>{book.title}</h3>
-                          <p className="text-xs text-gray-500 truncate mb-4" title={book.subtitle}>{book.subtitle || '부제 없음'}</p>
+                          <p className="text-xs text-gray-500 truncate mb-1" title={book.subtitle}>{book.subtitle || '부제 없음'}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase mb-3">{book.category || '미분류'}</p>
                           
                           <div className="mt-auto flex gap-2">
                             <button 
@@ -465,9 +533,10 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 border-r border-gray-100 pr-0 lg:pr-8">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
-                  <Plus size={20} className="text-secondary" /> 자료 추가
+                  {isEditingResource ? <Edit size={20} className="text-secondary" /> : <Plus size={20} className="text-secondary" />}
+                  {isEditingResource ? "자료 수정" : "자료 추가"}
                 </h2>
-                <form onSubmit={handleAddResource} className="space-y-4">
+                <form onSubmit={handleSaveResource} className="space-y-4">
                    <div>
                      <label className="block text-xs font-bold text-gray-500 mb-1">관련 도서 선택 *</label>
                      <select 
@@ -524,9 +593,17 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                      <textarea rows={2} className="w-full px-3 py-2 border rounded-lg focus:border-secondary outline-none resize-none bg-white text-gray-900"
                        value={resourceForm.description} onChange={(e) => setResourceForm({...resourceForm, description: e.target.value})}></textarea>
                    </div>
-                   <button type="submit" className="w-full py-2.5 bg-secondary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors">
-                     자료 등록
-                   </button>
+                   
+                   <div className="flex gap-2">
+                       <button type="submit" className="flex-1 py-2.5 bg-secondary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors">
+                         {isEditingResource ? "자료 수정" : "자료 등록"}
+                       </button>
+                       {isEditingResource && (
+                           <button type="button" onClick={resetResourceForm} className="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
+                               취소
+                           </button>
+                       )}
+                   </div>
                 </form>
               </div>
 
@@ -548,12 +625,22 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                              </p>
                            </div>
                         </div>
-                        <button 
-                          onClick={() => { if(window.confirm('삭제하시겠습니까?')) deleteResource(res.id); }}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        <div className="flex gap-1 shrink-0">
+                             <button 
+                                onClick={() => handleEditResource(res)}
+                                className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                                title="수정"
+                             >
+                                <Edit size={18} />
+                             </button>
+                             <button 
+                                onClick={() => { if(window.confirm('정말 삭제하시겠습니까?')) deleteResource(res.id); }}
+                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                title="삭제"
+                             >
+                                <Trash2 size={18} />
+                             </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -650,10 +737,16 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                   <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
                     <form onSubmit={handleSaveSiteSettings} className="space-y-6">
                       <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-200">
-                        <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
-                          <img src={previewUrl} onError={() => setPreviewUrl("https://placehold.co/200x200?text=Error")} alt="Preview" className="w-full h-full object-cover" />
+                        {/* Modified Preview Container */}
+                        <div className="w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-dashed border-gray-300 shadow-md mb-4 bg-gray-100 flex items-center justify-center">
+                           {previewUrl ? (
+                              <img src={previewUrl} onError={() => setPreviewUrl("https://placehold.co/800x800?text=Image+Error")} alt="Preview" className="w-full h-full object-cover" />
+                           ) : (
+                              <span className="text-gray-400">이미지 없음</span>
+                           )}
                         </div>
-                        <span className="text-sm text-gray-500">메인 화면 미리보기</span>
+                        <span className="text-sm text-gray-500 font-medium">메인 화면 미리보기 (1:1 비율 권장)</span>
+                        <span className="text-xs text-gray-400 mt-1">권장 사이즈: 800x800px 이상</span>
                       </div>
 
                       <div>
@@ -668,8 +761,8 @@ export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
                               onChange={(e) => handleProfileImageChange(e.target.value)}
                               placeholder="https://..."
                            />
-                           <button type="button" onClick={() => handleProfileImageChange("https://loremflickr.com/800/800/writer,portrait,man")} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm">
-                             기본값
+                           <button type="button" onClick={() => handleProfileImageChange("https://loremflickr.com/800/800/writer,portrait,man")} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm whitespace-nowrap">
+                             기본값 복원
                            </button>
                         </div>
                         {profileImageUrl.includes('imgur.com/a/') && <p className="text-xs text-red-500 mt-1 font-bold">Imgur 앨범 링크는 사용할 수 없습니다. 이미지 우클릭 → 주소 복사를 이용하세요.</p>}

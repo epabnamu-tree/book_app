@@ -20,7 +20,7 @@ const BookDetail: React.FC = () => {
       {/* Breadcrumb / Back */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
         <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-primary transition-colors">
-          <ArrowLeft size={16} /> 다른 책 보러가기
+          <ArrowLeft size={16} /> 홈으로 돌아가기
         </Link>
       </div>
 
@@ -39,6 +39,11 @@ const BookDetail: React.FC = () => {
             {/* Book Info */}
             <div className="w-full md:w-2/3 pt-4">
               <div className="flex flex-wrap gap-2 mb-4">
+                {book.category && (
+                  <span className="bg-secondary text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {book.category}
+                  </span>
+                )}
                 {book.tags.map(tag => (
                   <span key={tag} className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                     {tag}

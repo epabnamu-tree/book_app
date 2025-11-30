@@ -6,12 +6,14 @@ export interface Book {
   description: string;
   publishDate: string;
   publisher: string;
-  chapters: BookChapter[]; // Kept for type compatibility, but UI will prefer tableOfContents string
+  chapters: BookChapter[]; // Kept for type compatibility
   tags: string[];
   purchaseUrl?: string;
   authorNote?: string;
   reviewsText?: string;
   tableOfContents?: string;
+  category?: string; // New: Series or Category name
+  isPinned?: boolean; // New: If true, fixed on Home page
 }
 
 export interface BookChapter {
