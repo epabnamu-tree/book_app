@@ -1,4 +1,3 @@
-
 // 이 파일은 관리자 페이지의 [데이터 내보내기] 기능을 통해 생성된 코드 혹은 초기 데이터입니다.
 
 export const APP_NAME = "이팝나무의 서재";
@@ -14,15 +13,16 @@ export const INITIAL_BOOKS = [
     "description": "AI 시대의 새로운 해법, 기본소득과 사회적 경제를 말하다. 기술의 발전 속에서 인간의 가치를 지키는 방법을 제시합니다.",
     "publishDate": "2024. 10. 01",
     "publisher": "미래지향",
-    "tags": [
-      "Economics",
-      "AI",
-      "Future"
-    ],
-    "purchaseUrl": "https://www.kyobobook.co.kr/",
-    "authorNote": "이 책은 저희 연구그룹이 지난 5년간 AI 연구소와 사회적 기업 현장에서 치열하게 고민했던 기록입니다.\n\n기술은 차갑지만, 그 기술이 닿는 곳은 사람이어야 합니다. 우리는 지금 중요한 갈림길에 서 있습니다. 기술이 소수의 전유물이 될 것인가, 아니면 모두를 위한 도구가 될 것인가.\n\n이 책이 독자 여러분께 작은 나침반이 되기를 바랍니다.",
-    "reviewsText": "\"AI 시대의 필독서. 경제학적 통찰과 인문학적 깊이가 어우러진 수작이다.\" - 김철수 (경제학 교수)\n\n\"기술 만능주의에 대한 따끔한 일침이자, 따뜻한 대안을 제시하는 책.\" - 이영희 (AI 스타트업 CEO)\n\n\"미래를 준비하는 모든 이들에게 권하고 싶다.\" - 박민수 (미래학자)",
-    "tableOfContents": "프롤로그: 변화의 파도 앞에서\n\n1부. 기술의 역설\n제1장 AI의 도래와 노동의 종말\n제2장 풍요 속의 빈곤, 무엇이 문제인가\n\n2부. 새로운 안전망\n제3장 기본소득, 필연적 선택인가?\n제4장 실험 사례로 보는 기본소득의 효과\n\n3부. 공존을 위한 경제\n제5장 사회적 경제와 공동체의 회복\n제6장 협동조합, 경쟁을 넘어 협력으로\n\n에필로그: 우리는 어떤 미래를 선택할 것인가",
+    "tags": ["Economics", "AI", "Future"],
+    "purchaseLinks": {
+      "kyobo": "https://www.kyobobook.co.kr/",
+      "aladin": "https://www.aladin.co.kr/",
+      "yes24": "https://www.yes24.com/"
+    },
+    "format": ["종이책", "전자책"],
+    "authorNote": "이 책은 저희 연구그룹이 지난 5년간 AI 연구소와 사회적 기업 현장에서 치열하게 고민했던 기록입니다.",
+    "reviewsText": "\"AI 시대의 필독서.\"",
+    "tableOfContents": "1부. 기술의 역설\n2부. 새로운 안전망",
     "chapters": [],
     "category": "함께 배우는 인공지능",
     "isPinned": false
@@ -35,59 +35,43 @@ export const INITIAL_BOOKS = [
     "description": "무한 경쟁의 시대는 끝났다. 함께 잘 사는 방법을 고민하는 협동조합의 역사와 실제 사례를 통해 대안 경제를 모색합니다.",
     "publishDate": "2023. 05. 15",
     "publisher": "열린세상",
-    "tags": [
-      "Economy",
-      "Social",
-      "History"
-    ],
-    "purchaseUrl": "https://www.kyobobook.co.kr/",
-    "authorNote": "경쟁만이 살 길이라고 외치는 세상에서 '협동'의 가치를 말하고 싶었습니다.\n혼자 가면 빨리 가지만, 함께 가면 멀리 간다는 옛말이 경제 시스템에서도 유효함을 증명하고 싶었습니다.",
-    "reviewsText": "\"협동조합이 구시대의 유물이 아니라 미래의 대안임을 명쾌하게 증명한다.\"\n\n\"이론과 실제가 균형 잡힌 최고의 경제 교양서.\"",
-    "tableOfContents": "제1장: 호모 이코노미쿠스의 오해\n제2장: 협동조합의 탄생과 역사\n제3장: 세계의 성공적인 협동조합 모델\n제4장: 플랫폼 자본주의와 플랫폼 협동조합\n제5장: 지속 가능한 삶을 위하여",
+    "tags": ["Economy", "Social", "History"],
+    "purchaseLinks": { "kyobo": "https://www.kyobobook.co.kr/" },
+    "format": ["종이책"],
+    "authorNote": "경쟁만이 살 길이라고 외치는 세상에서 '협동'의 가치를 말하고 싶었습니다.",
+    "reviewsText": "\"협동조합이 구시대의 유물이 아니라 미래의 대안임을 명쾌하게 증명한다.\"",
+    "tableOfContents": "제1장: 호모 이코노미쿠스의 오해",
     "chapters": [],
     "category": "함께 배우는 인공지능",
     "isPinned": true
   },
   {
-    "title": "기본배당",
-    "subtitle": "아니 기본배당",
-    "description": "기본배당ㅇ당다앋",
-    "publisher": "작사왕",
-    "coverUrl": "https://i.imgur.com/el6sqqq.png",
-    "purchaseUrl": "epabnamu.org",
-    "tags": [
-      "ai",
-      "커먼즈",
-      "경제"
-    ],
-    "authorNote": "fsdggfgfdgdf",
-    "reviewsText": "dfgdfgdfgdf",
-    "tableOfContents": "ddfgdgd",
-    "category": "ai 시대 시리즈",
-    "isPinned": true,
-    "publishDate": "20250601",
-    "id": "기본배당",
-    "chapters": []
+    "id": "ai-ethics",
+    "title": "인공지능 윤리 가이드",
+    "subtitle": "개발자와 사용자가 알아야 할 모든 것",
+    "coverUrl": "https://loremflickr.com/600/900/robot,ai",
+    "description": "편향성, 투명성, 책임성 등 AI 윤리의 핵심 쟁점을 다룹니다.",
+    "publishDate": "2024. 01. 20",
+    "publisher": "테크북스",
+    "tags": ["AI", "Ethics", "Tech"],
+    "purchaseLinks": {},
+    "format": ["전자책"],
+    "category": "함께 배우는 인공지능",
+    "isPinned": true
   },
   {
-    "title": "뚱딴지",
-    "subtitle": "ehowlrkawk",
-    "description": "ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제",
-    "publisher": "자사와",
-    "coverUrl": "https://i.imgur.com/NLrOAp9.jpeg",
-    "purchaseUrl": "www.epabnamu.org",
-    "tags": [
-      "ai",
-      "사회적경제"
-    ],
-    "authorNote": "ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제",
-    "reviewsText": "ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제ai, 사회적경제",
-    "tableOfContents": "ai, 사회적경제ai, \n사회적경제ai, 사회적경제ai, \n사회적경제ai, 사회적경제ai, \n사회적경제",
-    "category": "함꼐배우는 이공지능",
-    "isPinned": false,
-    "id": "뚱딴지",
-    "publishDate": "2025-11-30",
-    "chapters": []
+    "id": "future-work",
+    "title": "일의 미래",
+    "subtitle": "로봇과 함께 일하는 법",
+    "coverUrl": "https://loremflickr.com/600/900/work,future",
+    "description": "자동화 시대, 인간의 노동은 어떻게 변화할 것인가?",
+    "publishDate": "2023. 11. 10",
+    "publisher": "미래지향",
+    "tags": ["Work", "Future"],
+    "purchaseLinks": {},
+    "format": ["종이책"],
+    "category": "사회과학",
+    "isPinned": false
   }
 ];
 
@@ -99,7 +83,8 @@ export const INITIAL_RESOURCES = [
     "type": "PDF",
     "size": "1.2MB",
     "description": "본문에 인용된 모든 논문과 서적의 목록입니다.",
-    "url": "#"
+    "url": "#",
+    "category": "PUBLIC"
   },
   {
     "id": 2,
@@ -108,48 +93,13 @@ export const INITIAL_RESOURCES = [
     "type": "PDF",
     "size": "3.5MB",
     "description": "독서 모임을 위한 질문지와 가이드라인입니다.",
-    "url": "#"
-  },
-  {
-    "id": 3,
-    "bookId": "coop-economy",
-    "title": "협동조합 설립 메뉴얼",
-    "type": "ZIP",
-    "size": "15MB",
-    "description": "실무자를 위한 표준 정관 및 설립 신고서 양식 모음.",
-    "url": "#"
+    "url": "#",
+    "category": "BOOK",
+    "downloadCode": "biepa@1234"
   }
 ];
 
 export const INITIAL_POSTS = [
-  {
-    "id": 1764518361319,
-    "title": "지워지나 테스트해봐요 여기는 토론방",
-    "author": "이나무",
-    "email": "123@123.COM",
-    "password": "1234",
-    "date": "2025-11-30",
-    "content": "비밀번호 1234",
-    "tags": [
-      "일반"
-    ],
-    "comments": [
-      {
-        "id": 1764518375229,
-        "author": "익명",
-        "content": "안뇽 댓글 (비번:1234)",
-        "date": "2025-11-30",
-        "password": "1234"
-      },
-      {
-        "id": 1764518387885,
-        "author": "홍수아",
-        "content": "또 안뇽",
-        "date": "2025-11-30",
-        "password": "1234"
-      }
-    ]
-  },
   {
     "id": 1,
     "bookId": "insight",
@@ -159,10 +109,7 @@ export const INITIAL_POSTS = [
     "password": "123",
     "date": "2023-10-25",
     "content": "책의 2장을 읽고 궁금증이 생겼습니다. 여러분의 생각은 어떠신가요?",
-    "tags": [
-      "기본소득",
-      "질문"
-    ],
+    "tags": ["기본소득", "질문"],
     "comments": [
       {
         "id": 101,
@@ -172,20 +119,17 @@ export const INITIAL_POSTS = [
         "password": "123"
       }
     ]
-  },
+  }
+];
+
+export const INITIAL_ARTICLES = [
   {
-    "id": 2,
-    "bookId": "insight",
-    "title": "AI 창작물의 저작권 문제에 대해",
-    "author": "크리에이터",
-    "email": "user2@example.com",
-    "password": "123",
-    "date": "2023-10-28",
-    "content": "4장에서 다룬 법적 문제들이 흥미롭네요. AI가 만든 그림은 누구의 것일까요?",
-    "tags": [
-      "AI",
-      "윤리"
-    ],
+    "id": 1,
+    "title": "연구그룹 이팝나무의 첫 번째 칼럼",
+    "author": "이팝나무",
+    "date": "2025-01-01",
+    "content": "안녕하세요. 연구그룹 이팝나무입니다. 앞으로 이 공간을 통해 책에서 다하지 못한 이야기와 최신 연구 동향, 그리고 저희의 소소한 생각들을 나누고자 합니다.\n\n많은 관심 부탁드립니다.",
+    "tags": ["공지", "인사말"],
     "comments": []
   }
 ];
@@ -195,7 +139,5 @@ export const FAQS = [
 ];
 
 export const CHAPTERS = [
-  { id: 1, title: "1장. AI의 도래", description: "인공지능이 가져올 노동의 변화" },
-  { id: 2, title: "2장. 기본소득", description: "새로운 사회 안전망의 필요성" },
-  { id: 3, title: "3장. 사회적 경제", description: "경쟁을 넘어선 연대" }
+  { id: 1, title: "1장", description: "내용" }
 ];

@@ -1,79 +1,71 @@
 
-import React from 'react';
-import { FileText, Download, ExternalLink, Archive } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { FileText, Download, ExternalLink, Archive, Lock, X } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { Resource } from '../types';
+import { useSEO } from '../hooks/useSEO';
 
 const Resources: React.FC = () => {
-  const { resources } = useData();
+  useSEO({ title: "자료실", description: "도서 부록 및 연구 자료를 다운로드할 수 있습니다." });
+  const { resources, books } = useData();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const filterBookId = searchParams.get('bookId');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PUBLIC' | 'BOOK'>('ALL');
+  const [downloadModal, setDownloadModal] = useState<{ isOpen: boolean, resource: Resource | null }>({ isOpen: false, resource: null });
+  const [downloadCode, setDownloadCode] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+
+  const filteredResources = resources.filter(res => {
+    const matchesTab = activeTab === 'ALL' || res.category === activeTab || (!res.category && activeTab === 'PUBLIC');
+    const matchesBook = filterBookId ? res.bookId === filterBookId : true;
+    return matchesTab && matchesBook;
+  });
+
+  const handleDownloadClick = (res: Resource) => {
+    if (res.category === 'BOOK') { setDownloadModal({ isOpen: true, resource: res }); setDownloadCode(""); setDownloadError(""); } 
+    else { window.open(res.url, '_blank'); }
+  };
+  const handleVerifyDownload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (downloadModal.resource?.downloadCode === downloadCode) { window.open(downloadModal.resource.url, '_blank'); setDownloadModal({ isOpen: false, resource: null }); } 
+    else { setDownloadError("코드가 일치하지 않습니다."); }
+  };
 
   return (
     <div className="py-12 bg-white min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-serif font-bold text-primary mb-4">자료실 & 부록</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            책의 내용을 더 깊이 이해하기 위한 보조 자료들을 모았습니다.<br />
-            모든 자료는 독자 여러분의 학습과 연구를 위해 무료로 제공됩니다.
-          </p>
-        </div>
-
-        {resources.length === 0 ? (
-           <div className="text-center py-20 bg-gray-50 rounded-xl">
-             <p className="text-gray-500">등록된 자료가 없습니다.</p>
+        <div className="text-center mb-12"><h1 className="text-4xl font-serif font-bold text-primary mb-4">자료실 & 부록</h1></div>
+        <div className="flex justify-center mb-12">
+           <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+              {['ALL', 'PUBLIC', 'BOOK'].map(t => <button key={t} onClick={() => setActiveTab(t as any)} className={`px-4 py-2 rounded-md text-sm font-bold ${activeTab === t ? 'bg-white text-primary shadow-sm' : 'text-gray-500'}`}>{t === 'ALL' ? '전체' : t === 'PUBLIC' ? '일반' : '도서(인증)'}</button>)}
            </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {resources.map((resource) => (
-              <div key={resource.id} className="bg-background rounded-xl p-6 border border-gray-100 flex flex-col hover:border-secondary transition-colors group">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${
-                    resource.type === 'PDF' ? 'bg-red-50 text-red-500' :
-                    resource.type === 'ZIP' ? 'bg-yellow-50 text-yellow-600' : 'bg-blue-50 text-blue-500'
-                  }`}>
-                    {resource.type === 'PDF' && <FileText size={24} />}
-                    {resource.type === 'ZIP' && <Archive size={24} />}
-                    {resource.type === 'LINK' && <ExternalLink size={24} />}
-                  </div>
-                  <span className="text-xs font-bold bg-white px-2 py-1 rounded border border-gray-200 text-gray-500">
-                    {resource.type} {resource.size && `• ${resource.size}`}
-                  </span>
-                </div>
-                
-                <h3 className="text-lg font-bold text-primary mb-2 group-hover:text-secondary transition-colors">
-                  {resource.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-6 flex-grow">
-                  {resource.description}
-                </p>
-
-                <a 
-                  href={resource.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full py-2.5 bg-white border border-gray-200 text-primary font-medium rounded-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-                >
-                  {resource.type === 'LINK' ? <ExternalLink size={16} /> : <Download size={16} />}
-                  {resource.type === 'LINK' ? '페이지 이동' : '다운로드'}
-                </a>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-20 p-8 bg-primary/5 rounded-2xl border border-primary/10">
-          <h3 className="text-xl font-bold font-serif text-primary mb-4">자료 활용 시 유의사항</h3>
-          <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-            <li>제공되는 모든 자료의 저작권은 저자와 출판사에 있습니다.</li>
-            <li>개인적인 학습 및 비영리 목적의 독서 모임에서는 자유롭게 사용하실 수 있습니다.</li>
-            <li>자료를 무단으로 가공하여 재배포하거나 상업적으로 이용하는 것은 금지됩니다.</li>
-            <li>파일 다운로드에 문제가 있을 경우 '문의하기' 게시판을 이용해 주세요.</li>
-          </ul>
         </div>
-
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredResources.map(res => (
+                <div key={res.id} className="bg-background rounded-xl p-6 border border-gray-100 flex flex-col relative group">
+                    {res.category === 'BOOK' && <div className="absolute top-4 right-4 text-purple-400"><Lock size={20}/></div>}
+                    <h3 className="text-lg font-bold text-primary mb-2">{res.title}</h3>
+                    <p className="text-gray-600 text-sm mb-6 flex-grow">{res.description}</p>
+                    <button onClick={() => handleDownloadClick(res)} className={`w-full py-2.5 font-medium rounded-lg flex items-center justify-center gap-2 ${res.category === 'BOOK' ? 'bg-purple-50 text-purple-600' : 'bg-white border text-primary'}`}>{res.category === 'BOOK' ? '인증 후 다운로드' : '다운로드'}</button>
+                </div>
+            ))}
+        </div>
       </div>
+      {downloadModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+              <h3 className="text-lg font-bold mb-4">도서 인증</h3>
+              <form onSubmit={handleVerifyDownload}>
+                 <input type="text" placeholder="인증 코드" className="w-full px-4 py-3 border rounded-lg mb-2 bg-white text-gray-900" value={downloadCode} onChange={(e) => setDownloadCode(e.target.value)} />
+                 {downloadError && <p className="text-red-500 text-xs mb-3">{downloadError}</p>}
+                 <div className="flex gap-2"><button type="button" onClick={() => setDownloadModal({isOpen: false, resource: null})} className="flex-1 py-3 bg-gray-200 rounded-lg">취소</button><button type="submit" className="flex-1 py-3 bg-purple-600 text-white rounded-lg">확인</button></div>
+              </form>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
-
 export default Resources;

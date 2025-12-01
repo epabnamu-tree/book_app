@@ -6,14 +6,20 @@ export interface Book {
   description: string;
   publishDate: string;
   publisher: string;
-  chapters: BookChapter[]; // Kept for type compatibility
+  chapters: BookChapter[];
   tags: string[];
-  purchaseUrl?: string;
+  purchaseLinks?: {
+    kyobo?: string;
+    aladin?: string;
+    yes24?: string;
+    other?: string;
+  };
+  format?: string[]; 
   authorNote?: string;
   reviewsText?: string;
   tableOfContents?: string;
-  category?: string; // New: Series or Category name
-  isPinned?: boolean; // New: If true, fixed on Home page
+  category?: string; 
+  isPinned?: boolean; 
 }
 
 export interface BookChapter {
@@ -24,7 +30,7 @@ export interface BookChapter {
 
 export interface Review {
   id: number;
-  bookId?: string; // Optional linkage to specific book
+  bookId?: string; 
   author: string;
   role: string;
   content: string;
@@ -33,15 +39,16 @@ export interface Review {
 
 export interface Post {
   id: number;
-  bookId?: string; // Which book is this about?
+  bookId?: string;
   title: string;
   author: string;
-  email?: string;     // Added for user identification
-  password?: string;  // Added for editing/deleting
+  email?: string;
+  password?: string;
   date: string;
   content: string;
   tags: string[];
   comments: Comment[];
+  isHidden?: boolean;
 }
 
 export interface Comment {
@@ -49,21 +56,44 @@ export interface Comment {
   author: string;
   content: string;
   date: string;
-  password?: string; // Added for editing/deleting
+  password?: string; 
+  isHidden?: boolean;
+}
+
+export interface Article {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+  author: string; 
+  tags: string[];
+  isHidden?: boolean;
+  comments: ArticleComment[];
+}
+
+export interface ArticleComment {
+  id: number;
+  author: string;
+  content: string;
+  date: string;
+  password?: string; 
+  isHidden?: boolean; 
 }
 
 export interface Resource {
   id: number;
-  bookId?: string; // Linked to a book
+  bookId?: string;
   title: string;
   type: 'PDF' | 'ZIP' | 'LINK';
   size?: string;
   description: string;
   url: string;
+  category?: 'PUBLIC' | 'BOOK'; 
+  downloadCode?: string; 
 }
 
 export interface FaqItem {
-  id: string | number; // Added for management
+  id: string | number; 
   question: string;
   answer: string;
 }
