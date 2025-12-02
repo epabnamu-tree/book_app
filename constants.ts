@@ -152,9 +152,9 @@ export const INITIAL_POSTS = [
 ];
 export const INITIAL_ARTICLES = [
   {
-    "id": 1764647910269,
-    "title": "컬럼44",
-    "content": "컬럼44 테스트",
+    "id": 1764652483081,
+    "title": "컬럼 66",
+    "content": "컬럼 66",
     "author": "이팝나무",
     "date": "2025-12-02",
     "tags": [
@@ -163,14 +163,24 @@ export const INITIAL_ARTICLES = [
     "comments": []
   },
   {
-    "id": 1,
-    "title": "연구그룹 이팝나무의 첫 번째 칼럼",
+    "id": 1764652472969,
+    "title": "컬럼 55",
+    "content": "컬럼 55",
     "author": "이팝나무",
-    "date": "2025-01-01",
-    "content": "안녕하세요. 연구그룹 이팝나무입니다. 앞으로 이 공간을 통해 책에서 다하지 못한 이야기와 최신 연구 동향, 그리고 저희의 소소한 생각들을 나누고자 합니다.\n\n많은 관심 부탁드립니다.",
+    "date": "2025-12-02",
     "tags": [
-      "공지",
-      "인사말"
+      "칼럼"
+    ],
+    "comments": []
+  },
+  {
+    "id": 1764647910269,
+    "title": "컬럼44",
+    "content": "컬럼44 테스트",
+    "author": "이팝나무",
+    "date": "2025-12-02",
+    "tags": [
+      "칼럼"
     ],
     "comments": []
   }

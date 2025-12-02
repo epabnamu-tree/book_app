@@ -86,9 +86,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateComment = (postId: number, c: Comment) => setPosts(prev => prev.map(p => p.id === postId ? { ...p, comments: p.comments.map(x => x.id === c.id ? c : x) } : p));
   const deleteComment = (postId: number, cid: number) => setPosts(prev => prev.map(p => p.id === postId ? { ...p, comments: p.comments.filter(x => x.id !== cid) } : p));
 
+  // 🚀 [수정됨] 삭제 기능 강화 (타입 변환 및 필터링 확실하게)
   const addArticle = (a: Article) => setArticles(prev => [a, ...prev]);
   const updateArticle = (u: Article) => setArticles(prev => prev.map(a => a.id === u.id ? u : a));
-  const deleteArticle = (id: number) => setArticles(prev => prev.filter(a => a.id !== id));
+  
+  const deleteArticle = (id: number) => {
+    // ID를 숫자로 확실하게 변환하여 비교
+    setArticles(prevArticles => prevArticles.filter(a => Number(a.id) !== Number(id)));
+  };
+
   const addArticleComment = (aid: number, c: ArticleComment) => setArticles(prev => prev.map(a => a.id === aid ? {...a, comments: [...a.comments, c]} : a));
   const updateArticleComment = (aid: number, c: ArticleComment) => setArticles(prev => prev.map(a => a.id === aid ? {...a, comments: a.comments.map(x => x.id === c.id ? c : x)} : a));
   const deleteArticleComment = (aid: number, cid: number) => setArticles(prev => prev.map(a => a.id === aid ? {...a, comments: a.comments.filter(x => x.id !== cid)} : a));

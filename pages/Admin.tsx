@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource, FaqItem, Article, Post, Comment, ArticleComment } from '../types';
 
@@ -64,6 +64,9 @@ const Admin: React.FC = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingComment, setEditingComment] = useState<{postId: number, comment: Comment} | null>(null);
 
+  // 🚀 [추가] 삭제 확인 모달 상태
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, type: 'article' | 'book' | 'resource' | 'faq' | null, id: any | null }>({ isOpen: false, type: null, id: null });
+
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
 
   const generateExportCode = () => {
@@ -96,6 +99,32 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       }
   };
 
+  // 🚀 [추가] 통합 삭제 핸들러 (모달 실행)
+  const openDeleteModal = (type: 'article' | 'book' | 'resource' | 'faq', id: any) => {
+      setDeleteModal({ isOpen: true, type, id });
+  };
+
+  const handleConfirmDelete = () => {
+      if (!deleteModal.id || !deleteModal.type) return;
+      
+      if (deleteModal.type === 'article') {
+          deleteArticle(deleteModal.id);
+          if (isEditingArticle === deleteModal.id) resetArticleForm();
+      } else if (deleteModal.type === 'book') {
+          deleteBook(deleteModal.id);
+          if (isEditingBook === deleteModal.id) resetBookForm();
+      } else if (deleteModal.type === 'resource') {
+          deleteResource(deleteModal.id);
+          if (isEditingResource === deleteModal.id) resetResourceForm();
+      } else if (deleteModal.type === 'faq') {
+          deleteFaq(deleteModal.id);
+          if (isEditingFaq === deleteModal.id) resetFaqForm();
+      }
+
+      setDeleteModal({ isOpen: false, type: null, id: null });
+      alert("삭제되었습니다.");
+  };
+
   // Book Handlers
   const resetBookForm = () => { setBookForm({ title: "", subtitle: "", description: "", publisher: "", coverUrl: "https://loremflickr.com/600/900/book,cover,abstract", purchaseLinks: { kyobo: "", aladin: "", yes24: "", other: "" }, format: [], tags: [], authorNote: "", reviewsText: "", tableOfContents: "", category: "", isPinned: false }); setTagsInput(""); setIsEditingBook(null); };
   const handleEditBook = (book: Book) => { setIsEditingBook(book.id); setBookForm({ ...book, purchaseLinks: book.purchaseLinks || { kyobo: "", aladin: "", yes24: "", other: "" } }); setTagsInput(book.tags.join(', ')); window.scrollTo({ top: 0, behavior: 'smooth' }); };
@@ -106,6 +135,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
   const resetArticleForm = () => { setArticleForm({ title: "", content: "", tags: "" }); setIsEditingArticle(null); };
   const handleEditArticle = (art: Article) => { setIsEditingArticle(art.id); setArticleForm({ title: art.title, content: art.content, tags: art.tags.join(', ') }); };
   const handleSaveArticle = (e: React.FormEvent) => { e.preventDefault(); const tagList = articleForm.tags.split(',').map(t => t.trim()).filter(Boolean); const newArticle: Article = { id: isEditingArticle || Date.now(), title: articleForm.title, content: articleForm.content, author: "이팝나무", date: new Date().toISOString().split('T')[0], tags: tagList.length > 0 ? tagList : ["칼럼"], comments: isEditingArticle ? articles.find(a => a.id === isEditingArticle)?.comments || [] : [] }; if (isEditingArticle) updateArticle(newArticle); else addArticle(newArticle); alert("저장되었습니다."); resetArticleForm(); };
+  
   const toggleArticleCommentBlind = (articleId: number, comment: ArticleComment) => { updateArticleComment(articleId, { ...comment, isHidden: !comment.isHidden }); };
 
   // Resource Handlers
@@ -218,7 +248,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                               </div>
                               <div className="flex gap-2 text-sm">
                                   <button onClick={() => handleEditBook(b)} className="text-blue-500">수정</button>
-                                  <button onClick={() => deleteBook(b.id)} className="text-red-500">삭제</button>
+                                  <button onClick={() => openDeleteModal('book', b.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button>
                               </div>
                           </div>
                       ))}
@@ -241,7 +271,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                   <div>
                       <h2 className="text-xl font-bold mb-6 text-primary">목록</h2>
                       <div className="space-y-2 h-[500px] overflow-y-auto">
-                          {articles.map(art => (<div key={art.id} className="p-4 border rounded bg-gray-50 flex justify-between items-start"><div><h4 className="font-bold">{art.title}</h4></div><div className="flex gap-2"><button onClick={() => handleEditArticle(art)} className="text-blue-500 text-sm">수정</button><button onClick={() => { if(window.confirm("삭제?")) deleteArticle(art.id); }} className="text-red-500 text-sm">삭제</button></div></div>))}
+                          {articles.map(art => (<div key={art.id} className="p-4 border rounded bg-gray-50 flex justify-between items-start"><div><h4 className="font-bold">{art.title}</h4></div><div className="flex gap-2"><button onClick={() => handleEditArticle(art)} className="text-blue-500 text-sm">수정</button><button onClick={() => openDeleteModal('article', art.id)} className="text-red-500 text-sm flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div></div>))}
                       </div>
                   </div>
               </div>
@@ -254,60 +284,37 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            {activeTab === 'resource' && (
                <div className="grid lg:grid-cols-2 gap-8">
                    <div>
-                       <h2 className="text-xl font-bold mb-4">자료 등록/수정</h2>
+                       <h2 className="text-xl font-bold mb-4">자료 등록</h2>
                        <form onSubmit={handleSaveResource} className="space-y-4">
                            <input type="text" placeholder="자료명" value={resourceForm.title} onChange={e=>setResourceForm({...resourceForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required />
+                           <select value={resourceForm.bookId || ""} onChange={e=>setResourceForm({...resourceForm, bookId: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900"><option value="">선택 안 함</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select>
                            
-                           <label className="block text-xs font-bold text-gray-500">관련 도서 선택</label>
-                           <select value={resourceForm.bookId || ""} onChange={e=>setResourceForm({...resourceForm, bookId: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900">
-                               <option value="">선택 안 함 (공통 자료)</option>
-                               {books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
-                           </select>
-
+                           {/* Restore Full Resource Form Fields */}
                            <div className="grid grid-cols-2 gap-2">
                                <select value={resourceForm.type} onChange={e=>setResourceForm({...resourceForm, type: e.target.value as any})} className="w-full p-2 border rounded bg-white text-gray-900">
-                                   <option value="PDF">PDF</option>
-                                   <option value="ZIP">ZIP</option>
-                                   <option value="LINK">LINK</option>
+                                   <option value="PDF">PDF</option><option value="ZIP">ZIP</option><option value="LINK">LINK</option>
                                </select>
                                <input type="text" placeholder="용량 (예: 1.5MB)" value={resourceForm.size} onChange={e=>setResourceForm({...resourceForm, size: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
                            </div>
-
                            <div className="flex gap-4 border p-2 rounded">
-                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='PUBLIC'} onChange={()=>setResourceForm({...resourceForm, category:'PUBLIC'})} /> 일반 자료</label>
-                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='BOOK'} onChange={()=>setResourceForm({...resourceForm, category:'BOOK'})} /> 도서 인증 필요</label>
+                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='PUBLIC'} onChange={()=>setResourceForm({...resourceForm, category:'PUBLIC'})} /> 일반</label>
+                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='BOOK'} onChange={()=>setResourceForm({...resourceForm, category:'BOOK'})} /> 도서인증</label>
                            </div>
-                           {resourceForm.category === 'BOOK' && <input type="text" placeholder="다운로드 인증 코드 (예: epab1234)" value={resourceForm.downloadCode} onChange={e=>setResourceForm({...resourceForm, downloadCode: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />}
+                           {resourceForm.category === 'BOOK' && <input type="text" placeholder="인증 코드" value={resourceForm.downloadCode} onChange={e=>setResourceForm({...resourceForm, downloadCode: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />}
                            
-                           <input type="text" placeholder="다운로드 링크 / 이동 URL" value={resourceForm.url} onChange={e=>setResourceForm({...resourceForm, url: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
+                           <input type="text" placeholder="URL" value={resourceForm.url} onChange={e=>setResourceForm({...resourceForm, url: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
                            <textarea placeholder="자료 설명" value={resourceForm.description} onChange={e=>setResourceForm({...resourceForm, description: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
 
                            <button className="w-full py-2 bg-primary text-white rounded">저장</button>
-                           {isEditingResource && <button type="button" onClick={resetResourceForm} className="w-full py-2 bg-gray-200 rounded mt-2">취소</button>}
                        </form>
                    </div>
                    <div className="h-[600px] overflow-y-auto">
-                       <h2 className="text-xl font-bold mb-4">자료 목록</h2>
-                       {resources.map(r => (
-                           <div key={r.id} className="flex justify-between p-3 border-b hover:bg-gray-50">
-                               <div>
-                                   <div className="font-bold">{r.title}</div>
-                                   <div className="text-xs text-gray-500">{r.type} | {r.category === 'BOOK' ? '🔒 도서인증' : '🌍 일반'}</div>
-                               </div>
-                               <div className="flex gap-2">
-                                   <button onClick={()=>handleEditResource(r)} className="text-blue-500">수정</button>
-                                   <button onClick={()=>deleteResource(r.id)} className="text-red-500">삭제</button>
-                               </div>
-                           </div>
-                       ))}
+                       {resources.map(r => (<div key={r.id} className="flex justify-between p-3 border-b"><span>{r.title}</span><div className="flex gap-2"><button onClick={()=>handleEditResource(r)} className="text-blue-500">수정</button><button onClick={()=>openDeleteModal('resource', r.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div></div>))}
                    </div>
                </div>
            )}
-
-           {/* --- FAQ TAB --- */}
-           {activeTab === 'faq' && (<div><h2 className="text-xl font-bold mb-4">FAQ 관리</h2><form onSubmit={handleSaveFaq}><input className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} placeholder="질문"/><textarea className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} placeholder="답변"/><button className="bg-primary text-white px-4 py-2 rounded">저장</button></form><div className="mt-4">{faqs.map(f=><div key={f.id} className="border-b p-2 flex justify-between"><span>{f.question}</span><button onClick={()=>deleteFaq(f.id)} className="text-red-500">삭제</button></div>)}</div></div>)}
+           {activeTab === 'faq' && (<div><h2 className="text-xl font-bold mb-4">FAQ 관리</h2><form onSubmit={handleSaveFaq}><input className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} placeholder="질문"/><textarea className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} placeholder="답변"/><button className="bg-primary text-white px-4 py-2 rounded">저장</button></form><div className="mt-4">{faqs.map(f=><div key={f.id} className="border-b p-2 flex justify-between"><span>{f.question}</span><button onClick={()=>openDeleteModal('faq', f.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div>)}</div></div>)}
            
-           {/* --- SITE TAB --- */}
            {activeTab === 'site' && (
                <div className="space-y-8">
                    <div className="p-6 border rounded-xl bg-gray-50">
@@ -332,6 +339,38 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            )}
         </div>
       </div>
+
+      {/* 🚀 삭제 확인 모달 */}
+      {deleteModal.isOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full animate-fade-in-down border border-red-100">
+                  <div className="flex flex-col items-center text-center mb-6">
+                      <div className="bg-red-100 p-3 rounded-full mb-3">
+                          <AlertTriangle className="text-red-600" size={32} />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">정말 삭제하시겠습니까?</h3>
+                      <p className="text-sm text-gray-500 mt-2">
+                          삭제된 데이터는 복구할 수 없습니다.<br/>
+                          신중하게 결정해 주세요.
+                      </p>
+                  </div>
+                  <div className="flex gap-3">
+                      <button 
+                          onClick={() => setDeleteModal({ isOpen: false, type: null, id: null })} 
+                          className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition-colors"
+                      >
+                          취소
+                      </button>
+                      <button 
+                          onClick={handleConfirmDelete} 
+                          className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors shadow-md"
+                      >
+                          삭제하기
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
     </div>
   );
 };
