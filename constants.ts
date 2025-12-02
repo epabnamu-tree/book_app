@@ -3,6 +3,7 @@
 export const APP_NAME = "이팝나무의 서재";
 export const DEFAULT_ADMIN_PASSWORD = "slit0800@@";
 export const MASTER_KEY = "ipannamoo2024!";
+export const INITIAL_PROFILE_IMAGE = "https://i.imgur.com/AEoNPVC.jpeg";
 export const INITIAL_BOOKS = [
   {
     "id": "insight",
@@ -63,7 +64,7 @@ export const INITIAL_BOOKS = [
     "id": "ai-ethics",
     "title": "인공지능 윤리 가이드",
     "subtitle": "개발자와 사용자가 알아야 할 모든 것",
-    "coverUrl": "https://loremflickr.com/600/900/robot,ai",
+    "coverUrl": "https://i.imgur.com/tGC7ut4.jpeg",
     "description": "편향성, 투명성, 책임성 등 AI 윤리의 핵심 쟁점을 다룹니다.",
     "publishDate": "2024. 01. 20",
     "publisher": "테크북스",
@@ -77,13 +78,14 @@ export const INITIAL_BOOKS = [
       "전자책"
     ],
     "category": "함께 배우는 인공지능",
-    "isPinned": true
+    "isPinned": true,
+    "chapters": []
   },
   {
     "id": "future-work",
     "title": "일의 미래",
     "subtitle": "로봇과 함께 일하는 법",
-    "coverUrl": "https://loremflickr.com/600/900/work,future",
+    "coverUrl": "https://i.imgur.com/NLrOAp9.jpeg",
     "description": "자동화 시대, 인간의 노동은 어떻게 변화할 것인가?",
     "publishDate": "2023. 11. 10",
     "publisher": "미래지향",
@@ -96,7 +98,8 @@ export const INITIAL_BOOKS = [
       "종이책"
     ],
     "category": "사회과학",
-    "isPinned": false
+    "isPinned": false,
+    "chapters": []
   }
 ];
 export const INITIAL_RESOURCES = [
@@ -149,6 +152,17 @@ export const INITIAL_POSTS = [
 ];
 export const INITIAL_ARTICLES = [
   {
+    "id": 1764647910269,
+    "title": "컬럼22",
+    "content": "컬럼2 테스트",
+    "author": "이팝나무",
+    "date": "2025-12-02",
+    "tags": [
+      "칼럼"
+    ],
+    "comments": []
+  },
+  {
     "id": 1,
     "title": "연구그룹 이팝나무의 첫 번째 칼럼",
     "author": "이팝나무",
@@ -166,6 +180,16 @@ export const FAQS = [
     "id": 1,
     "question": "강연 요청은 어떻게 하나요?",
     "answer": "문의하기 페이지의 폼을 작성해주시거나 이메일로 연락 주시면 일정 확인 후 회신 드립니다."
+  },
+  {
+    "id": 1764647834184,
+    "question": "구독은 어떻게 하나요?",
+    "answer": "구독 버튼을 누르세요"
+  },
+  {
+    "id": 1764647929721,
+    "question": "구독은",
+    "answer": "버튼 누르세요"
   }
 ];
 export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];

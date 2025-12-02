@@ -9,9 +9,13 @@ const Comments: React.FC<CommentsProps> = ({ id, title }) => {
   useEffect(() => {
     const SHORTNAME = "epabnamu"; // 사용자님의 Disqus ID
 
+    // 고유 URL 생성 (현재 주소 + # + ID)
+    // 이렇게 해야 Disqus가 서로 다른 페이지로 인식합니다.
+    const uniqueUrl = `${window.location.origin}${window.location.pathname}#!${id}`;
+
     // @ts-ignore
     window.disqus_config = function () {
-      this.page.url = window.location.href;
+      this.page.url = uniqueUrl;  // 고유 URL 적용
       this.page.identifier = id;
       this.page.title = title;
     };
@@ -28,7 +32,7 @@ const Comments: React.FC<CommentsProps> = ({ id, title }) => {
           config: function () {
             this.page.identifier = id;
             this.page.title = title;
-            this.page.url = window.location.href;
+            this.page.url = uniqueUrl; // 리셋 시에도 고유 URL 적용
           }
         });
       }

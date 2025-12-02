@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Book, Post, Resource, Comment, FaqItem, Article, ArticleComment } from '../types';
-import { INITIAL_BOOKS, INITIAL_POSTS, INITIAL_RESOURCES, FAQS, DEFAULT_ADMIN_PASSWORD, MASTER_KEY, INITIAL_ARTICLES } from '../constants';
+import { INITIAL_BOOKS, INITIAL_POSTS, INITIAL_RESOURCES, FAQS, DEFAULT_ADMIN_PASSWORD, MASTER_KEY, INITIAL_ARTICLES, INITIAL_PROFILE_IMAGE } from '../constants';
 
 interface DataContextType {
   books: Book[];
@@ -55,7 +55,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [resources, setResources] = useState<Resource[]>(() => loadFromStorage('epabnamu_resources', INITIAL_RESOURCES as Resource[]));
   const [faqs, setFaqs] = useState<FaqItem[]>(() => loadFromStorage('epabnamu_faqs', FAQS));
   const [articles, setArticles] = useState<Article[]>(() => loadFromStorage('epabnamu_articles', INITIAL_ARTICLES));
-  const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('epabnamu_profile_image', "https://loremflickr.com/800/600/meeting,team,office"));
+  const [authorProfileImage, setAuthorProfileImage] = useState<string>(() => loadFromStorage('epabnamu_profile_image', INITIAL_PROFILE_IMAGE));
   const [adminPassword, setAdminPassword] = useState<string>(() => loadFromStorage('epabnamu_admin_pw', DEFAULT_ADMIN_PASSWORD));
   const [isAdmin, setIsAdmin] = useState(false);
 

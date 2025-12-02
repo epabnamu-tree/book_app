@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource, FaqItem, Article, Post, Comment, ArticleComment } from '../types';
 
-// ... (Utility functions convertGoogleDriveLink, getDirectImageUrl keep same) ...
 const convertGoogleDriveLink = (url: string) => {
   if (!url || !url.includes('drive.google.com')) return url;
   const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
@@ -40,7 +39,6 @@ const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'book' | 'resource' | 'community' | 'article' | 'faq' | 'site'>('book');
   const [exportCode, setExportCode] = useState("");
 
-  // --- States ---
   const [isEditingBook, setIsEditingBook] = useState<string | null>(null);
   const [tagsInput, setTagsInput] = useState("");
   const [bookForm, setBookForm] = useState<Partial<Book>>({ 
@@ -62,19 +60,19 @@ const Admin: React.FC = () => {
   const [isEditingArticle, setIsEditingArticle] = useState<number | null>(null);
   const [articleForm, setArticleForm] = useState<{title: string, content: string, tags: string}>({ title: "", content: "", tags: "" });
 
-  // Community Management States
   const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingComment, setEditingComment] = useState<{postId: number, comment: Comment} | null>(null);
 
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
 
-  useEffect(() => {
+  const generateExportCode = () => {
     const code = `
 // constants.ts 파일의 내용을 아래 코드로 교체하세요.
 export const APP_NAME = "이팝나무의 서재";
 export const DEFAULT_ADMIN_PASSWORD = "slit0800@@";
 export const MASTER_KEY = "ipannamoo2024!";
+export const INITIAL_PROFILE_IMAGE = "${authorProfileImage}";
 export const INITIAL_BOOKS = ${JSON.stringify(books, null, 2)};
 export const INITIAL_RESOURCES = ${JSON.stringify(resources, null, 2)};
 export const INITIAL_POSTS = ${JSON.stringify(posts, null, 2)};
@@ -83,85 +81,47 @@ export const FAQS = ${JSON.stringify(faqs, null, 2)};
 export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
     `;
     setExportCode(code);
-  }, [books, resources, posts, articles, faqs]);
+  };
 
-  // --- Handlers ---
+  useEffect(() => {
+    generateExportCode();
+  }, [books, resources, posts, articles, faqs, authorProfileImage]);
+
   const handleLogin = (e: React.FormEvent) => { e.preventDefault(); if (login(password)) setError(""); else setError("비밀번호가 올바르지 않습니다."); };
   const handleResetPassword = () => { const key = prompt("마스터 키 입력"); if (key && login(key)) setError(""); else alert("실패"); };
   const handleFactoryReset = () => {
       if (window.confirm("경고: 모든 데이터를 초기화합니다!\n\n현재 웹사이트에 저장된 모든 글, 댓글, 설정이 삭제되고 constants.ts에 정의된 초기 상태(책 4권 등)로 되돌아갑니다.\n\n정말 진행하시겠습니까?")) {
-          // 명시적으로 모든 키 삭제
-          localStorage.removeItem('epabnamu_books');
-          localStorage.removeItem('epabnamu_posts');
-          localStorage.removeItem('epabnamu_resources');
-          localStorage.removeItem('epabnamu_faqs');
-          localStorage.removeItem('epabnamu_articles');
-          localStorage.removeItem('epabnamu_profile_image');
-          localStorage.removeItem('epabnamu_admin_pw');
-          
-          // 전체 삭제 (안전장치)
           localStorage.clear();
-          
-          alert("초기화되었습니다. 페이지를 새로고침합니다.");
           window.location.reload();
       }
   };
 
-  // Book
-  const resetBookForm = () => { 
-      setBookForm({ title: "", subtitle: "", description: "", publisher: "", coverUrl: "https://loremflickr.com/600/900/book,cover,abstract", purchaseLinks: { kyobo: "", aladin: "", yes24: "", other: "" }, format: [], tags: [], authorNote: "", reviewsText: "", tableOfContents: "", category: "", isPinned: false }); 
-      setTagsInput(""); setIsEditingBook(null); 
-  };
+  // Book Handlers
+  const resetBookForm = () => { setBookForm({ title: "", subtitle: "", description: "", publisher: "", coverUrl: "https://loremflickr.com/600/900/book,cover,abstract", purchaseLinks: { kyobo: "", aladin: "", yes24: "", other: "" }, format: [], tags: [], authorNote: "", reviewsText: "", tableOfContents: "", category: "", isPinned: false }); setTagsInput(""); setIsEditingBook(null); };
   const handleEditBook = (book: Book) => { setIsEditingBook(book.id); setBookForm({ ...book, purchaseLinks: book.purchaseLinks || { kyobo: "", aladin: "", yes24: "", other: "" } }); setTagsInput(book.tags.join(', ')); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const handleSaveBook = (e: React.FormEvent) => { 
-     e.preventDefault(); 
-     const currentTags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
-     const processedCoverUrl = getDirectImageUrl(bookForm.coverUrl || "");
-     if (processedCoverUrl === "ERROR_ALBUM") { alert("Imgur Album Error"); return; }
-     const bookData: Book = { ...bookForm as Book, coverUrl: processedCoverUrl, id: isEditingBook || bookForm.title?.toLowerCase().replace(/\s+/g, '-') || `book-${Date.now()}`, publishDate: bookForm.publishDate || new Date().toISOString().split('T')[0], tags: currentTags.length > 0 ? currentTags : ["New"], chapters: [] };
-     if (isEditingBook) updateBook(bookData); else addBook(bookData); 
-     resetBookForm();
-  };
+  const handleSaveBook = (e: React.FormEvent) => { e.preventDefault(); const currentTags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0); const processedCoverUrl = getDirectImageUrl(bookForm.coverUrl || ""); if (processedCoverUrl === "ERROR_ALBUM") { alert("Imgur Album Error"); return; } const bookData: Book = { ...bookForm as Book, coverUrl: processedCoverUrl, id: isEditingBook || bookForm.title?.toLowerCase().replace(/\s+/g, '-') || `book-${Date.now()}`, publishDate: bookForm.publishDate || new Date().toISOString().split('T')[0], tags: currentTags.length > 0 ? currentTags : ["New"], chapters: [] }; if (isEditingBook) updateBook(bookData); else addBook(bookData); resetBookForm(); };
   const toggleFormat = (fmt: string) => { const current = bookForm.format || []; if (current.includes(fmt)) setBookForm({...bookForm, format: current.filter(f => f !== fmt)}); else setBookForm({...bookForm, format: [...current, fmt]}); };
 
-  // Article
+  // Article Handlers
   const resetArticleForm = () => { setArticleForm({ title: "", content: "", tags: "" }); setIsEditingArticle(null); };
   const handleEditArticle = (art: Article) => { setIsEditingArticle(art.id); setArticleForm({ title: art.title, content: art.content, tags: art.tags.join(', ') }); };
-  const handleSaveArticle = (e: React.FormEvent) => {
-    e.preventDefault();
-    const tagList = articleForm.tags.split(',').map(t => t.trim()).filter(Boolean);
-    const newArticle: Article = {
-        id: isEditingArticle || Date.now(),
-        title: articleForm.title,
-        content: articleForm.content,
-        author: "이팝나무",
-        date: new Date().toISOString().split('T')[0],
-        tags: tagList.length > 0 ? tagList : ["칼럼"],
-        comments: isEditingArticle ? articles.find(a => a.id === isEditingArticle)?.comments || [] : []
-    };
-    if (isEditingArticle) updateArticle(newArticle); else addArticle(newArticle);
-    alert("저장되었습니다."); resetArticleForm();
-  };
-  const toggleArticleCommentBlind = (articleId: number, comment: ArticleComment) => {
-      updateArticleComment(articleId, { ...comment, isHidden: !comment.isHidden });
-  };
+  const handleSaveArticle = (e: React.FormEvent) => { e.preventDefault(); const tagList = articleForm.tags.split(',').map(t => t.trim()).filter(Boolean); const newArticle: Article = { id: isEditingArticle || Date.now(), title: articleForm.title, content: articleForm.content, author: "이팝나무", date: new Date().toISOString().split('T')[0], tags: tagList.length > 0 ? tagList : ["칼럼"], comments: isEditingArticle ? articles.find(a => a.id === isEditingArticle)?.comments || [] : [] }; if (isEditingArticle) updateArticle(newArticle); else addArticle(newArticle); alert("저장되었습니다."); resetArticleForm(); };
+  const toggleArticleCommentBlind = (articleId: number, comment: ArticleComment) => { updateArticleComment(articleId, { ...comment, isHidden: !comment.isHidden }); };
 
-  // Resource
+  // Resource Handlers
   const resetResourceForm = () => { setResourceForm({ title: "", type: "PDF", description: "", url: "", size: "", bookId: "", category: "PUBLIC", downloadCode: "" }); setIsEditingResource(null); };
   const handleEditResource = (res: Resource) => { setIsEditingResource(res.id); setResourceForm(res); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const handleSaveResource = (e: React.FormEvent) => { e.preventDefault(); const resData: Resource = { id: isEditingResource || Date.now(), title: resourceForm.title!, type: resourceForm.type as any, description: resourceForm.description || "", url: resourceForm.url || "#", size: resourceForm.size || "", bookId: resourceForm.bookId || "", category: resourceForm.category || "PUBLIC", downloadCode: resourceForm.category === 'BOOK' ? resourceForm.downloadCode : undefined }; if(isEditingResource) updateResource(resData); else addResource(resData); resetResourceForm(); };
 
-  // FAQ
+  // FAQ/Site Handlers
   const resetFaqForm = () => { setFaqForm({ question: "", answer: "" }); setIsEditingFaq(null); };
   const handleEditFaq = (faq: FaqItem) => { setIsEditingFaq(faq.id); setFaqForm(faq); };
   const handleSaveFaq = (e: React.FormEvent) => { e.preventDefault(); const d: FaqItem = { id: isEditingFaq || Date.now(), question: faqForm.question!, answer: faqForm.answer! }; if(isEditingFaq) updateFaq(d); else addFaq(d); resetFaqForm(); };
-
-  // Site
   const handleProfileImageChange = (val: string) => { setProfileImageUrl(val); const d = getDirectImageUrl(val); if(d !== "ERROR_ALBUM") setPreviewUrl(d); };
   const handleSaveSiteSettings = (e: React.FormEvent) => { e.preventDefault(); const d = getDirectImageUrl(profileImageUrl); if(d==="ERROR_ALBUM") { alert("Error"); return; } updateProfileImage(d); setProfileImageUrl(d); setPreviewUrl(d); alert("Saved"); };
   const handleChangePassword = (e: React.FormEvent) => { e.preventDefault(); if(newAdminPassword.length<4) { alert("Too short"); return; } changePassword(newAdminPassword); setNewAdminPassword(""); alert("Changed"); };
-
-  // Community
+  
+  // Community Handlers
   const togglePostBlind = (post: Post) => { updatePost({ ...post, isHidden: !post.isHidden }); };
   const toggleCommentBlind = (postId: number, comment: Comment) => { updateComment(postId, { ...comment, isHidden: !comment.isHidden }); };
   const saveEditedPost = () => { if(editingPost) { updatePost(editingPost); setEditingPost(null); } };
@@ -217,10 +177,10 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                           <div className="p-4 border rounded bg-gray-50">
                              <h4 className="font-bold mb-2 text-xs text-gray-500">구매 링크</h4>
                              <div className="grid grid-cols-2 gap-2">
-                                <input type="text" placeholder="교보문고 URL" value={bookForm.purchaseLinks?.kyobo || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, kyobo: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
-                                <input type="text" placeholder="알라딘 URL" value={bookForm.purchaseLinks?.aladin || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, aladin: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
-                                <input type="text" placeholder="YES24 URL" value={bookForm.purchaseLinks?.yes24 || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, yes24: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
-                                <input type="text" placeholder="기타 URL" value={bookForm.purchaseLinks?.other || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, other: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
+                                <input type="text" placeholder="교보문고" value={bookForm.purchaseLinks?.kyobo || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, kyobo: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
+                                <input type="text" placeholder="알라딘" value={bookForm.purchaseLinks?.aladin || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, aladin: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
+                                <input type="text" placeholder="YES24" value={bookForm.purchaseLinks?.yes24 || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, yes24: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
+                                <input type="text" placeholder="기타" value={bookForm.purchaseLinks?.other || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, other: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
                              </div>
                           </div>
                           
@@ -249,8 +209,11 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                               <div className="flex items-center gap-3">
                                   <img src={b.coverUrl} className="w-8 h-12 object-cover" alt="" />
                                   <div>
-                                      <div className="font-bold">{b.title}</div>
-                                      <div className="text-xs text-gray-500">{b.category} {b.isPinned && <span className="text-red-500">[PIN]</span>}</div>
+                                      <div className="font-bold text-sm">
+                                          {b.title}
+                                          {b.isPinned && <span className="text-red-500 ml-1 text-xs font-extrabold">[PIN]</span>}
+                                      </div>
+                                      <div className="text-xs text-gray-500">{b.category}</div>
                                   </div>
                               </div>
                               <div className="flex gap-2 text-sm">
@@ -267,102 +230,27 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            {activeTab === 'article' && (
               <div className="grid lg:grid-cols-2 gap-8">
                   <div>
-                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary"><PenTool size={20}/> {isEditingArticle ? "글 수정" : "새 글 작성"}</h2>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary"><PenTool size={20}/> 글 작성/수정</h2>
                       <form onSubmit={handleSaveArticle} className="space-y-4">
-                          <div><label className="block text-xs font-bold text-gray-500 mb-1">제목</label><input type="text" value={articleForm.title} onChange={e => setArticleForm({...articleForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required /></div>
-                          <div><label className="block text-xs font-bold text-gray-500 mb-1">태그 (쉼표 구분)</label><input type="text" value={articleForm.tags} onChange={e => setArticleForm({...articleForm, tags: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" /></div>
-                          <div><label className="block text-xs font-bold text-gray-500 mb-1">내용</label><textarea rows={10} value={articleForm.content} onChange={e => setArticleForm({...articleForm, content: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required /></div>
+                          <input type="text" value={articleForm.title} onChange={e => setArticleForm({...articleForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required placeholder="제목" />
+                          <input type="text" value={articleForm.tags} onChange={e => setArticleForm({...articleForm, tags: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" placeholder="태그" />
+                          <textarea rows={10} value={articleForm.content} onChange={e => setArticleForm({...articleForm, content: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required placeholder="내용" />
                           <div className="flex gap-2"><button className="flex-1 py-2 bg-primary text-white rounded font-bold">저장</button>{isEditingArticle && <button type="button" onClick={resetArticleForm} className="flex-1 py-2 bg-gray-200 rounded font-bold">취소</button>}</div>
                       </form>
-                      {/* Article Comment Management */}
-                      {isEditingArticle && (
-                          <div className="mt-8 border-t pt-4">
-                              <h3 className="font-bold text-lg mb-2">댓글 관리</h3>
-                              <div className="space-y-2">
-                                  {articles.find(a => a.id === isEditingArticle)?.comments.map(c => (
-                                      <div key={c.id} className="p-3 bg-gray-50 rounded border flex justify-between items-center text-sm">
-                                          <div>
-                                              <span className="font-bold">{c.author}</span>: {c.content}
-                                              {c.isHidden && <span className="text-red-500 ml-2">(숨김 처리됨)</span>}
-                                          </div>
-                                          <div className="flex gap-2">
-                                              <button onClick={() => toggleArticleCommentBlind(isEditingArticle!, c)} className="text-orange-500">{c.isHidden ? <Eye size={14}/> : <EyeOff size={14}/>}</button>
-                                              <button onClick={() => { if(window.confirm("삭제?")) deleteArticleComment(isEditingArticle!, c.id); }} className="text-red-500"><Trash2 size={14}/></button>
-                                          </div>
-                                      </div>
-                                  ))}
-                              </div>
-                          </div>
-                      )}
                   </div>
                   <div>
-                      <h2 className="text-xl font-bold mb-6 text-primary">글 목록</h2>
+                      <h2 className="text-xl font-bold mb-6 text-primary">목록</h2>
                       <div className="space-y-2 h-[500px] overflow-y-auto">
-                          {articles.map(art => (<div key={art.id} className="p-4 border rounded bg-gray-50 flex justify-between items-start"><div><h4 className="font-bold">{art.title}</h4><p className="text-xs text-gray-500">{art.date} • 댓글 {art.comments.length}</p></div><div className="flex gap-2"><button onClick={() => handleEditArticle(art)} className="text-blue-500 text-sm">수정</button><button onClick={() => { if(window.confirm("삭제?")) deleteArticle(art.id); }} className="text-red-500 text-sm">삭제</button></div></div>))}
+                          {articles.map(art => (<div key={art.id} className="p-4 border rounded bg-gray-50 flex justify-between items-start"><div><h4 className="font-bold">{art.title}</h4></div><div className="flex gap-2"><button onClick={() => handleEditArticle(art)} className="text-blue-500 text-sm">수정</button><button onClick={() => { if(window.confirm("삭제?")) deleteArticle(art.id); }} className="text-red-500 text-sm">삭제</button></div></div>))}
                       </div>
                   </div>
               </div>
            )}
 
            {/* --- COMMUNITY TAB --- */}
-           {activeTab === 'community' && (
-              <div>
-                  <h2 className="text-xl font-bold mb-4">수다 떨기 (토론방) 관리</h2>
-                  <div className="bg-gray-50 p-4 rounded h-[600px] overflow-y-auto space-y-4">
-                      {posts.map(p => (
-                          <div key={p.id} className="bg-white p-4 border rounded shadow-sm">
-                              {editingPost?.id === p.id ? (
-                                  <div className="mb-2">
-                                      <input className="w-full p-2 border mb-1 bg-white text-gray-900" value={editingPost.title} onChange={e=>setEditingPost({...editingPost, title: e.target.value})} />
-                                      <textarea className="w-full p-2 border mb-1 bg-white text-gray-900" value={editingPost.content} onChange={e=>setEditingPost({...editingPost, content: e.target.value})} />
-                                      <div className="flex gap-2"><button onClick={saveEditedPost} className="bg-green-500 text-white px-2 py-1 rounded text-xs">저장</button><button onClick={()=>setEditingPost(null)} className="bg-gray-300 px-2 py-1 rounded text-xs">취소</button></div>
-                                  </div>
-                              ) : (
-                                  <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                          <h3 className="font-bold">{p.title} {p.isHidden && <span className="text-red-500 text-xs">(숨김)</span>}</h3>
-                                          <p className="text-sm text-gray-600 line-clamp-1">{p.content}</p>
-                                          <span className="text-xs text-gray-400">{p.author} | {p.date}</span>
-                                      </div>
-                                      <div className="flex gap-2">
-                                          <button onClick={()=>setEditingPost(p)} className="text-blue-500"><Edit size={16}/></button>
-                                          <button onClick={()=>togglePostBlind(p)} className="text-orange-500">{p.isHidden ? <Eye size={16}/> : <EyeOff size={16}/>}</button>
-                                          <button onClick={()=>deletePost(p.id)} className="text-red-500"><Trash2 size={16}/></button>
-                                          <button onClick={()=>setExpandedPostId(expandedPostId === p.id ? null : p.id)} className="text-gray-500">{expandedPostId === p.id ? "접기" : "댓글 보기"}</button>
-                                      </div>
-                                  </div>
-                              )}
-                              
-                              {/* Comments Section */}
-                              {(expandedPostId === p.id || true) && ( // Always show comments for easier admin
-                                  <div className="mt-2 pl-4 border-l-2 border-gray-100 space-y-2">
-                                      {p.comments.map(c => (
-                                          <div key={c.id} className="text-sm bg-gray-50 p-2 rounded flex justify-between items-center">
-                                              {editingComment?.comment.id === c.id ? (
-                                                  <div className="flex-1 mr-2">
-                                                      <input className="w-full p-1 border bg-white text-gray-900" value={editingComment.comment.content} onChange={e=>setEditingComment({...editingComment, comment: {...editingComment.comment, content: e.target.value}})} />
-                                                      <button onClick={saveEditedComment} className="text-xs text-green-600 mr-2">저장</button>
-                                                      <button onClick={()=>setEditingComment(null)} className="text-xs text-gray-500">취소</button>
-                                                  </div>
-                                              ) : (
-                                                  <span className="flex-1">{c.content} {c.isHidden && <span className="text-red-500 text-xs">(숨김)</span>} <span className="text-gray-400 text-xs">- {c.author}</span></span>
-                                              )}
-                                              <div className="flex gap-1">
-                                                  <button onClick={()=>setEditingComment({postId: p.id, comment: c})} className="text-blue-400"><Edit size={12}/></button>
-                                                  <button onClick={()=>toggleCommentBlind(p.id, c)} className="text-orange-400">{c.isHidden ? <Eye size={12}/> : <EyeOff size={12}/>}</button>
-                                                  <button onClick={()=>deleteComment(p.id, c.id)} className="text-red-400"><Trash2 size={12}/></button>
-                                              </div>
-                                          </div>
-                                      ))}
-                                  </div>
-                              )}
-                          </div>
-                      ))}
-                  </div>
-              </div>
-           )}
+           {activeTab === 'community' && (<div><h2 className="text-xl font-bold mb-4">수다 떨기 (Disqus로 운영중)</h2><p>댓글 관리는 Disqus 관리자 페이지에서 가능합니다.</p></div>)}
 
-           {/* --- RESOURCE TAB --- */}
+           {/* --- RESOURCE TAB (Fully Restored) --- */}
            {activeTab === 'resource' && (
                <div className="grid lg:grid-cols-2 gap-8">
                    <div>
@@ -417,60 +305,28 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            )}
 
            {/* --- FAQ TAB --- */}
-           {activeTab === 'faq' && (
-               <div>
-                   <h2 className="text-xl font-bold mb-4">FAQ 관리</h2>
-                   <form onSubmit={handleSaveFaq} className="mb-4 space-y-2">
-                       <input type="text" placeholder="질문" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
-                       <textarea placeholder="답변" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
-                       <button className="px-4 py-2 bg-primary text-white rounded">저장</button>
-                   </form>
-                   <div>{faqs.map(f => <div key={f.id} className="p-2 border-b flex justify-between"><span>{f.question}</span><div><button onClick={()=>handleEditFaq(f)} className="text-blue-500 mr-2">수정</button><button onClick={()=>deleteFaq(f.id)} className="text-red-500">삭제</button></div></div>)}</div>
-               </div>
-           )}
-
+           {activeTab === 'faq' && (<div><h2 className="text-xl font-bold mb-4">FAQ 관리</h2><form onSubmit={handleSaveFaq}><input className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} placeholder="질문"/><textarea className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} placeholder="답변"/><button className="bg-primary text-white px-4 py-2 rounded">저장</button></form><div className="mt-4">{faqs.map(f=><div key={f.id} className="border-b p-2 flex justify-between"><span>{f.question}</span><button onClick={()=>deleteFaq(f.id)} className="text-red-500">삭제</button></div>)}</div></div>)}
+           
            {/* --- SITE TAB --- */}
            {activeTab === 'site' && (
                <div className="space-y-8">
                    <div className="p-6 border rounded-xl bg-gray-50">
-                       <h3 className="font-bold mb-4 text-lg">프로필 이미지 설정</h3>
-                       <div className="flex flex-col md:flex-row gap-8 items-start">
-                           <div className="flex-1 w-full">
-                               <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="w-full p-3 border rounded bg-white text-gray-900 mb-2" placeholder="이미지 URL 입력 (Imgur 등)" />
-                               <button onClick={handleSaveSiteSettings} className="bg-primary text-white px-6 py-2 rounded font-bold">저장</button>
-                               <p className="text-sm text-gray-500 mt-4">
-                                   * 메인 화면의 작가/연구그룹 사진으로 사용됩니다.<br/>
-                                   * <b>1:1 정사각형 비율</b>을 권장합니다.<br/>
-                                   * 권장 사이즈: <b>800x800px 이상</b>
-                               </p>
-                           </div>
-                           <div className="flex flex-col items-center">
-                               <span className="text-xs font-bold text-gray-400 mb-2">미리보기</span>
-                               {previewUrl ? (
-                                   <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-2xl object-cover border-4 border-white shadow-lg" />
-                               ) : (
-                                   <div className="w-48 h-48 rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400">No Image</div>
-                               )}
-                           </div>
+                       <h3 className="font-bold mb-4 text-lg">프로필 이미지</h3>
+                       <div className="flex gap-4">
+                           <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="flex-1 p-2 border rounded bg-white text-gray-900" />
+                           <button onClick={handleSaveSiteSettings} className="bg-primary text-white px-6 py-2 rounded font-bold">저장</button>
                        </div>
+                       {previewUrl && <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-2xl object-cover mt-2" />}
                    </div>
                    <div className="p-4 border rounded bg-gray-50 border-gray-200">
-                       <h3 className="font-bold mb-2 flex items-center gap-2"><RotateCcw size={18} className="text-red-500"/> 데이터 초기화 (공장 초기화)</h3>
-                       <p className="text-xs text-gray-600 mb-4">
-                           메인 페이지에 책이 2권만 보이는 등 데이터 오류가 있을 때 사용하세요.<br/>
-                           모든 데이터를 삭제하고 constants.ts에 정의된 기본 데이터(책 4권 등)로 되돌립니다.
-                       </p>
-                       <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition-colors">모든 데이터 초기화</button>
+                       <h3 className="font-bold mb-2 flex items-center gap-2"><RotateCcw size={18} className="text-red-500"/> 데이터 초기화</h3>
+                       <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold">초기화</button>
                    </div>
-                   <div className="p-4 border rounded">
-                       <h3 className="font-bold mb-2">비밀번호 변경</h3>
-                       <input type="password" value={newAdminPassword} onChange={e=>setNewAdminPassword(e.target.value)} className="w-full p-2 border rounded mb-2 bg-white text-gray-900" placeholder="새 비밀번호" />
-                       <button onClick={handleChangePassword} className="bg-red-500 text-white px-4 py-2 rounded">변경</button>
-                   </div>
-                   <div className="p-4 bg-gray-900 text-green-400 rounded">
-                       <h3 className="font-bold mb-2">데이터 내보내기</h3>
+                   <div className="p-4 bg-gray-900 text-green-400 rounded relative">
+                       <h3 className="font-bold mb-2">데이터 내보내기 (Deploy용)</h3>
+                       <button onClick={generateExportCode} className="absolute top-4 right-20 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1"><RefreshCw size={12}/> 코드 갱신</button>
                        <pre className="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto">{exportCode}</pre>
-                       <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-700 text-white px-3 py-1 rounded text-xs">Copy</button>
+                       <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-700 text-white px-3 py-1 rounded text-xs absolute top-4 right-4">Copy</button>
                    </div>
                </div>
            )}
