@@ -10,6 +10,9 @@ const Articles: React.FC = () => {
   const { articles } = useData();
   const [viewMode, setViewMode] = useState<'feed' | 'list'>('feed');
   const [expandedArticleId, setExpandedArticleId] = useState<number | null>(null);
+  
+  // 댓글창 열림 상태 관리 (글 ID 저장)
+  const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
 
   const sortedArticles = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -17,9 +20,14 @@ const Articles: React.FC = () => {
     setExpandedArticleId(expandedArticleId === id ? null : id);
   };
 
+  const toggleComments = (id: number) => {
+      setActiveCommentId(activeCommentId === id ? null : id);
+  };
+
   return (
     <div className="bg-[#F9F7F2] min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         <div className="text-center mb-12">
            <span className="text-secondary font-bold tracking-widest text-sm uppercase mb-3 block">Articles & Essays</span>
            <h1 className="text-4xl font-serif font-bold text-primary mb-4">글 나누기</h1>
@@ -43,6 +51,8 @@ const Articles: React.FC = () => {
            ) : (
              sortedArticles.map(article => (
                <div key={article.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                  
+                  {/* FEED 모드이거나 확장된 경우 */}
                   {viewMode === 'feed' || expandedArticleId === article.id ? (
                       <div className="p-8">
                          <div className="flex flex-wrap gap-2 mb-4">
@@ -54,14 +64,33 @@ const Articles: React.FC = () => {
                             <span className="flex items-center gap-1"><User size={12}/> {article.author}</span>
                             {viewMode === 'list' && (<button onClick={() => setExpandedArticleId(null)} className="ml-auto flex items-center gap-1 text-primary hover:underline">접기 <ChevronUp size={12}/></button>)}
                          </div>
+                         
                          <div className="prose prose-lg text-gray-700 leading-loose whitespace-pre-line mb-12">{article.content}</div>
                          
+                         {/* 댓글 토글 버튼 및 Disqus 영역 */}
                          <div className="bg-gray-50 rounded-xl p-6">
-                            <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2"><MessageSquare size={18}/> 댓글</h3>
-                            <Comments id={`article-${article.id}`} title={article.title} />
+                            <div className="flex justify-between items-center">
+                                <h3 className="font-bold text-gray-700 flex items-center gap-2"><MessageSquare size={18}/> 댓글</h3>
+                                <button onClick={() => toggleComments(article.id)} className="text-sm font-bold text-secondary hover:underline">
+                                    {activeCommentId === article.id ? "댓글 닫기" : "댓글 보기 / 쓰기"}
+                                </button>
+                            </div>
+                            
+                            {/* 버튼을 눌렀을 때만 Disqus 로드 (섞임 방지) */}
+                            {activeCommentId === article.id && (
+                                <div className="mt-4 animate-fade-in">
+                                    <p className="text-xs text-gray-400 mb-4">* 댓글 시스템은 Disqus를 사용하며 광고가 표시될 수 있습니다.</p>
+                                    <Comments 
+                                        id={`article-${article.id}`} 
+                                        title={article.title} 
+                                    />
+                                </div>
+                            )}
                          </div>
+
                       </div>
                   ) : (
+                      // LIST 모드
                       <div onClick={() => toggleExpand(article.id)} className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50">
                           <div className="flex items-center gap-4">
                              <span className="text-xs text-gray-400 w-24">{article.date}</span>
