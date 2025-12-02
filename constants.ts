@@ -152,6 +152,17 @@ export const INITIAL_POSTS = [
 ];
 export const INITIAL_ARTICLES = [
   {
+    "id": 1764652951213,
+    "title": "컬럼 77",
+    "content": "컬럼 77",
+    "author": "이팝나무",
+    "date": "2025-12-02",
+    "tags": [
+      "칼럼"
+    ],
+    "comments": []
+  },
+  {
     "id": 1764652483081,
     "title": "컬럼 66",
     "content": "컬럼 66",
@@ -166,17 +177,6 @@ export const INITIAL_ARTICLES = [
     "id": 1764652472969,
     "title": "컬럼 55",
     "content": "컬럼 55",
-    "author": "이팝나무",
-    "date": "2025-12-02",
-    "tags": [
-      "칼럼"
-    ],
-    "comments": []
-  },
-  {
-    "id": 1764647910269,
-    "title": "컬럼44",
-    "content": "컬럼44 테스트",
     "author": "이팝나무",
     "date": "2025-12-02",
     "tags": [

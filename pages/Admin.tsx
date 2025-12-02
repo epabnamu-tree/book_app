@@ -64,7 +64,7 @@ const Admin: React.FC = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingComment, setEditingComment] = useState<{postId: number, comment: Comment} | null>(null);
 
-  // 🚀 [추가] 삭제 확인 모달 상태
+  // 🚀 [추가] 삭제 확인 모달 상태 관리
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, type: 'article' | 'book' | 'resource' | 'faq' | null, id: any | null }>({ isOpen: false, type: null, id: null });
 
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
@@ -109,6 +109,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       
       if (deleteModal.type === 'article') {
           deleteArticle(deleteModal.id);
+          // 삭제하려는 글이 수정 중이었다면 폼 초기화
           if (isEditingArticle === deleteModal.id) resetArticleForm();
       } else if (deleteModal.type === 'book') {
           deleteBook(deleteModal.id);
@@ -122,7 +123,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       }
 
       setDeleteModal({ isOpen: false, type: null, id: null });
-      alert("삭제되었습니다.");
+      // alert("삭제되었습니다."); // 너무 잦은 알림 방지 위해 주석 처리 가능
   };
 
   // Book Handlers
@@ -188,8 +189,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            ))}
         </div>
         <div className="bg-white rounded-b-xl rounded-tr-xl shadow-sm border border-gray-100 p-6 min-h-[500px]">
-           
-           {/* --- BOOK TAB --- */}
            {activeTab === 'book' && (
               <div className="grid lg:grid-cols-2 gap-8">
                   <div>
@@ -203,7 +202,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                           </div>
                           <input type="text" placeholder="표지 URL" value={bookForm.coverUrl} onChange={e=>setBookForm({...bookForm, coverUrl: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
                           <textarea placeholder="설명" value={bookForm.description} onChange={e=>setBookForm({...bookForm, description: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required />
-                          
                           <div className="p-4 border rounded bg-gray-50">
                              <h4 className="font-bold mb-2 text-xs text-gray-500">구매 링크</h4>
                              <div className="grid grid-cols-2 gap-2">
@@ -213,21 +211,16 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                                 <input type="text" placeholder="기타" value={bookForm.purchaseLinks?.other || ""} onChange={e=>setBookForm({...bookForm, purchaseLinks: {...bookForm.purchaseLinks, other: e.target.value}})} className="w-full p-2 border rounded bg-white text-gray-900 text-xs" />
                              </div>
                           </div>
-                          
                           <div className="flex gap-4 p-2 border rounded">
                              <label className="flex items-center gap-2"><input type="checkbox" checked={bookForm.format?.includes('종이책')} onChange={()=>toggleFormat('종이책')} /> 종이책</label>
                              <label className="flex items-center gap-2"><input type="checkbox" checked={bookForm.format?.includes('전자책')} onChange={()=>toggleFormat('전자책')} /> 전자책</label>
                              <label className="flex items-center gap-2 ml-auto text-red-500"><input type="checkbox" checked={bookForm.isPinned || false} onChange={e=>setBookForm({...bookForm, isPinned: e.target.checked})} /> 메인 고정</label>
                           </div>
-
                           <input type="text" placeholder="카테고리" value={bookForm.category} onChange={e=>setBookForm({...bookForm, category: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
                           <input type="text" placeholder="태그 (쉼표 구분)" value={tagsInput} onChange={e=>setTagsInput(e.target.value)} className="w-full p-2 border rounded bg-white text-gray-900" />
-
-                          <h4 className="font-bold mt-2 text-xs">상세 내용 (줄글 입력)</h4>
                           <textarea placeholder="저자 노트" value={bookForm.authorNote} onChange={e=>setBookForm({...bookForm, authorNote: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
-                          <textarea placeholder="서평 모음" value={bookForm.reviewsText} onChange={e=>setBookForm({...bookForm, reviewsText: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
-                          <textarea placeholder="목차 (줄바꿈으로 구분)" value={bookForm.tableOfContents} onChange={e=>setBookForm({...bookForm, tableOfContents: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
-
+                          <textarea placeholder="서평" value={bookForm.reviewsText} onChange={e=>setBookForm({...bookForm, reviewsText: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
+                          <textarea placeholder="목차" value={bookForm.tableOfContents} onChange={e=>setBookForm({...bookForm, tableOfContents: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
                           <button className="w-full py-2 bg-primary text-white rounded">저장</button>
                           {isEditingBook && <button type="button" onClick={resetBookForm} className="w-full py-2 bg-gray-200 rounded">취소</button>}
                       </form>
@@ -255,8 +248,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                   </div>
               </div>
            )}
-
-           {/* --- ARTICLE TAB --- */}
            {activeTab === 'article' && (
               <div className="grid lg:grid-cols-2 gap-8">
                   <div>
@@ -276,11 +267,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                   </div>
               </div>
            )}
-
-           {/* --- COMMUNITY TAB --- */}
            {activeTab === 'community' && (<div><h2 className="text-xl font-bold mb-4">수다 떨기 (Disqus로 운영중)</h2><p>댓글 관리는 Disqus 관리자 페이지에서 가능합니다.</p></div>)}
-
-           {/* --- RESOURCE TAB (Fully Restored) --- */}
            {activeTab === 'resource' && (
                <div className="grid lg:grid-cols-2 gap-8">
                    <div>
@@ -288,8 +275,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                        <form onSubmit={handleSaveResource} className="space-y-4">
                            <input type="text" placeholder="자료명" value={resourceForm.title} onChange={e=>setResourceForm({...resourceForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required />
                            <select value={resourceForm.bookId || ""} onChange={e=>setResourceForm({...resourceForm, bookId: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900"><option value="">선택 안 함</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select>
-                           
-                           {/* Restore Full Resource Form Fields */}
                            <div className="grid grid-cols-2 gap-2">
                                <select value={resourceForm.type} onChange={e=>setResourceForm({...resourceForm, type: e.target.value as any})} className="w-full p-2 border rounded bg-white text-gray-900">
                                    <option value="PDF">PDF</option><option value="ZIP">ZIP</option><option value="LINK">LINK</option>
@@ -301,10 +286,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
                                <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='BOOK'} onChange={()=>setResourceForm({...resourceForm, category:'BOOK'})} /> 도서인증</label>
                            </div>
                            {resourceForm.category === 'BOOK' && <input type="text" placeholder="인증 코드" value={resourceForm.downloadCode} onChange={e=>setResourceForm({...resourceForm, downloadCode: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />}
-                           
                            <input type="text" placeholder="URL" value={resourceForm.url} onChange={e=>setResourceForm({...resourceForm, url: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
-                           <textarea placeholder="자료 설명" value={resourceForm.description} onChange={e=>setResourceForm({...resourceForm, description: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900 h-20" />
-
                            <button className="w-full py-2 bg-primary text-white rounded">저장</button>
                        </form>
                    </div>
