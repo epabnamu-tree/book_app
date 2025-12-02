@@ -62,10 +62,10 @@ export const INITIAL_BOOKS = [
   },
   {
     "id": "ai-ethics",
-    "title": "인공지능 윤리 가이드",
-    "subtitle": "개발자와 사용자가 알아야 할 모든 것",
+    "title": "테스트 도서001",
+    "subtitle": "시골풍경",
     "coverUrl": "https://i.imgur.com/tGC7ut4.jpeg",
-    "description": "편향성, 투명성, 책임성 등 AI 윤리의 핵심 쟁점을 다룹니다.",
+    "description": "강이 흐르는 마을",
     "publishDate": "2024. 01. 20",
     "publisher": "테크북스",
     "tags": [
@@ -153,8 +153,8 @@ export const INITIAL_POSTS = [
 export const INITIAL_ARTICLES = [
   {
     "id": 1764647910269,
-    "title": "컬럼22",
-    "content": "컬럼2 테스트",
+    "title": "컬럼44",
+    "content": "컬럼44 테스트",
     "author": "이팝나무",
     "date": "2025-12-02",
     "tags": [
