@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PenTool, Mic, ChevronRight, Book as BookIcon } from 'lucide-react';
@@ -41,6 +40,7 @@ const Home: React.FC = () => {
               기술이 바꾸는 현실 속에서 사회과학의 눈으로 질문합니다. <br/><b>AI는 어떻게 존재해야 하는가?</b><br/>연구그룹 이팝나무는 인공지능이 일부가 아닌 모두의 삶을 이롭게 하는 세상을 향해 연구하고 실천합니다.
             </p>
             <div className="pt-4 flex justify-center md:justify-start gap-4">
+               {/* 🚀 [수정됨] 링크 경로를 /about으로 명확히 지정 */}
                <Link to="/about" className="px-8 py-3.5 bg-white border border-gray-200 text-primary rounded-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow flex items-center gap-3">소개 더 보기</Link>
             </div>
           </div>
