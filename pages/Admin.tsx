@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle, Shield, Unlock } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource, FaqItem, Article, Post, Comment, ArticleComment } from '../types';
 
@@ -48,7 +48,9 @@ const Admin: React.FC = () => {
   });
   
   const [isEditingResource, setIsEditingResource] = useState<number | null>(null);
-  const [resourceForm, setResourceForm] = useState<Partial<Resource>>({ title: "", type: "PDF", description: "", url: "", size: "", bookId: "", category: "PUBLIC", downloadCode: "" });
+  const [resourceForm, setResourceForm] = useState<Partial<Resource>>({ 
+    title: "", type: "PDF", description: "", detailedDescription: "", url: "", size: "", bookId: "", category: "PUBLIC", downloadCode: "" 
+  });
   
   const [isEditingFaq, setIsEditingFaq] = useState<number | string | null>(null);
   const [faqForm, setFaqForm] = useState<Partial<FaqItem>>({ question: "", answer: "" });
@@ -64,7 +66,6 @@ const Admin: React.FC = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingComment, setEditingComment] = useState<{postId: number, comment: Comment} | null>(null);
 
-  // 🚀 [추가] 삭제 확인 모달 상태 관리
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, type: 'article' | 'book' | 'resource' | 'faq' | null, id: any | null }>({ isOpen: false, type: null, id: null });
 
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
@@ -99,7 +100,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       }
   };
 
-  // 🚀 [추가] 통합 삭제 핸들러 (모달 실행)
   const openDeleteModal = (type: 'article' | 'book' | 'resource' | 'faq', id: any) => {
       setDeleteModal({ isOpen: true, type, id });
   };
@@ -109,7 +109,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       
       if (deleteModal.type === 'article') {
           deleteArticle(deleteModal.id);
-          // 삭제하려는 글이 수정 중이었다면 폼 초기화
           if (isEditingArticle === deleteModal.id) resetArticleForm();
       } else if (deleteModal.type === 'book') {
           deleteBook(deleteModal.id);
@@ -123,7 +122,6 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
       }
 
       setDeleteModal({ isOpen: false, type: null, id: null });
-      // alert("삭제되었습니다."); // 너무 잦은 알림 방지 위해 주석 처리 가능
   };
 
   // Book Handlers
@@ -137,12 +135,26 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
   const handleEditArticle = (art: Article) => { setIsEditingArticle(art.id); setArticleForm({ title: art.title, content: art.content, tags: art.tags.join(', ') }); };
   const handleSaveArticle = (e: React.FormEvent) => { e.preventDefault(); const tagList = articleForm.tags.split(',').map(t => t.trim()).filter(Boolean); const newArticle: Article = { id: isEditingArticle || Date.now(), title: articleForm.title, content: articleForm.content, author: "이팝나무", date: new Date().toISOString().split('T')[0], tags: tagList.length > 0 ? tagList : ["칼럼"], comments: isEditingArticle ? articles.find(a => a.id === isEditingArticle)?.comments || [] : [] }; if (isEditingArticle) updateArticle(newArticle); else addArticle(newArticle); alert("저장되었습니다."); resetArticleForm(); };
   
-  const toggleArticleCommentBlind = (articleId: number, comment: ArticleComment) => { updateArticleComment(articleId, { ...comment, isHidden: !comment.isHidden }); };
-
   // Resource Handlers
-  const resetResourceForm = () => { setResourceForm({ title: "", type: "PDF", description: "", url: "", size: "", bookId: "", category: "PUBLIC", downloadCode: "" }); setIsEditingResource(null); };
+  const resetResourceForm = () => { setResourceForm({ title: "", type: "PDF", description: "", detailedDescription: "", url: "", size: "", bookId: "", category: "PUBLIC", downloadCode: "" }); setIsEditingResource(null); };
   const handleEditResource = (res: Resource) => { setIsEditingResource(res.id); setResourceForm(res); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const handleSaveResource = (e: React.FormEvent) => { e.preventDefault(); const resData: Resource = { id: isEditingResource || Date.now(), title: resourceForm.title!, type: resourceForm.type as any, description: resourceForm.description || "", url: resourceForm.url || "#", size: resourceForm.size || "", bookId: resourceForm.bookId || "", category: resourceForm.category || "PUBLIC", downloadCode: resourceForm.category === 'BOOK' ? resourceForm.downloadCode : undefined }; if(isEditingResource) updateResource(resData); else addResource(resData); resetResourceForm(); };
+  const handleSaveResource = (e: React.FormEvent) => { 
+      e.preventDefault(); 
+      const resData: Resource = { 
+          id: isEditingResource || Date.now(), 
+          title: resourceForm.title!, 
+          type: resourceForm.type as any, 
+          description: resourceForm.description || "", 
+          detailedDescription: resourceForm.detailedDescription || "",
+          url: resourceForm.url || "#", 
+          size: resourceForm.size || "", 
+          bookId: resourceForm.bookId || "", 
+          category: resourceForm.category || "PUBLIC", 
+          downloadCode: resourceForm.category === 'BOOK' ? resourceForm.downloadCode : undefined 
+      }; 
+      if(isEditingResource) updateResource(resData); else addResource(resData); 
+      resetResourceForm(); 
+  };
 
   // FAQ/Site Handlers
   const resetFaqForm = () => { setFaqForm({ question: "", answer: "" }); setIsEditingFaq(null); };
@@ -150,14 +162,7 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
   const handleSaveFaq = (e: React.FormEvent) => { e.preventDefault(); const d: FaqItem = { id: isEditingFaq || Date.now(), question: faqForm.question!, answer: faqForm.answer! }; if(isEditingFaq) updateFaq(d); else addFaq(d); resetFaqForm(); };
   const handleProfileImageChange = (val: string) => { setProfileImageUrl(val); const d = getDirectImageUrl(val); if(d !== "ERROR_ALBUM") setPreviewUrl(d); };
   const handleSaveSiteSettings = (e: React.FormEvent) => { e.preventDefault(); const d = getDirectImageUrl(profileImageUrl); if(d==="ERROR_ALBUM") { alert("Error"); return; } updateProfileImage(d); setProfileImageUrl(d); setPreviewUrl(d); alert("Saved"); };
-  const handleChangePassword = (e: React.FormEvent) => { e.preventDefault(); if(newAdminPassword.length<4) { alert("Too short"); return; } changePassword(newAdminPassword); setNewAdminPassword(""); alert("Changed"); };
   
-  // Community Handlers
-  const togglePostBlind = (post: Post) => { updatePost({ ...post, isHidden: !post.isHidden }); };
-  const toggleCommentBlind = (postId: number, comment: Comment) => { updateComment(postId, { ...comment, isHidden: !comment.isHidden }); };
-  const saveEditedPost = () => { if(editingPost) { updatePost(editingPost); setEditingPost(null); } };
-  const saveEditedComment = () => { if(editingComment) { updateComment(editingComment.postId, editingComment.comment); setEditingComment(null); } };
-
   if (!isAdmin) {
       return (
         <div className="min-h-[80vh] flex items-center justify-center bg-gray-50">
@@ -270,28 +275,106 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            {activeTab === 'community' && (<div><h2 className="text-xl font-bold mb-4">수다 떨기 (Disqus로 운영중)</h2><p>댓글 관리는 Disqus 관리자 페이지에서 가능합니다.</p></div>)}
            {activeTab === 'resource' && (
                <div className="grid lg:grid-cols-2 gap-8">
-                   <div>
-                       <h2 className="text-xl font-bold mb-4">자료 등록</h2>
-                       <form onSubmit={handleSaveResource} className="space-y-4">
-                           <input type="text" placeholder="자료명" value={resourceForm.title} onChange={e=>setResourceForm({...resourceForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required />
-                           <select value={resourceForm.bookId || ""} onChange={e=>setResourceForm({...resourceForm, bookId: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900"><option value="">선택 안 함</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select>
-                           <div className="grid grid-cols-2 gap-2">
-                               <select value={resourceForm.type} onChange={e=>setResourceForm({...resourceForm, type: e.target.value as any})} className="w-full p-2 border rounded bg-white text-gray-900">
-                                   <option value="PDF">PDF</option><option value="ZIP">ZIP</option><option value="LINK">LINK</option>
-                               </select>
-                               <input type="text" placeholder="용량 (예: 1.5MB)" value={resourceForm.size} onChange={e=>setResourceForm({...resourceForm, size: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
-                           </div>
-                           <div className="flex gap-4 border p-2 rounded">
-                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='PUBLIC'} onChange={()=>setResourceForm({...resourceForm, category:'PUBLIC'})} /> 일반</label>
-                               <label className="flex items-center gap-2"><input type="radio" checked={resourceForm.category==='BOOK'} onChange={()=>setResourceForm({...resourceForm, category:'BOOK'})} /> 도서인증</label>
-                           </div>
-                           {resourceForm.category === 'BOOK' && <input type="text" placeholder="인증 코드" value={resourceForm.downloadCode} onChange={e=>setResourceForm({...resourceForm, downloadCode: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />}
-                           <input type="text" placeholder="URL" value={resourceForm.url} onChange={e=>setResourceForm({...resourceForm, url: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
-                           <button className="w-full py-2 bg-primary text-white rounded">저장</button>
-                       </form>
+                   {/* Left Column: Resource List */}
+                   <div className="h-[600px] overflow-y-auto border-r pr-4">
+                       <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><FileText size={20}/> 자료 목록</h2>
+                       <div className="space-y-3">
+                           {resources.map(r => (
+                               <div key={r.id} className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50 flex flex-col gap-2">
+                                   <div className="flex justify-between items-start">
+                                       <div>
+                                           <div className="font-bold text-gray-800">{r.title}</div>
+                                           <div className="text-xs text-gray-500 mt-1">{r.bookId ? `<${books.find(b=>b.id===r.bookId)?.title}>` : '도서 미지정'}</div>
+                                       </div>
+                                       {r.category === 'BOOK' ? 
+                                           <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"><Lock size={10}/> 인증</span> : 
+                                           <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"><Unlock size={10}/> 일반</span>
+                                       }
+                                   </div>
+                                   <div className="flex justify-end gap-3 text-sm mt-2 border-t pt-2 border-gray-100">
+                                       <button onClick={()=>handleEditResource(r)} className="text-blue-600 font-medium hover:underline">수정</button>
+                                       <button onClick={()=>openDeleteModal('resource', r.id)} className="text-red-500 font-medium hover:underline flex items-center gap-1"><Trash2 size={12}/> 삭제</button>
+                                   </div>
+                               </div>
+                           ))}
+                       </div>
                    </div>
-                   <div className="h-[600px] overflow-y-auto">
-                       {resources.map(r => (<div key={r.id} className="flex justify-between p-3 border-b"><span>{r.title}</span><div className="flex gap-2"><button onClick={()=>handleEditResource(r)} className="text-blue-500">수정</button><button onClick={()=>openDeleteModal('resource', r.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div></div>))}
+
+                   {/* Right Column: Resource Form */}
+                   <div>
+                       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                           {isEditingResource ? <Edit size={20}/> : <Plus size={20}/>} {isEditingResource ? '자료 수정' : '새 자료 등록'}
+                       </h2>
+                       <form onSubmit={handleSaveResource} className="space-y-4 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                           <div>
+                               <label className="block text-xs font-bold text-gray-500 mb-1">자료 제목</label>
+                               <input type="text" placeholder="예: Insight 토론 가이드" value={resourceForm.title} onChange={e=>setResourceForm({...resourceForm, title: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" required />
+                           </div>
+                           
+                           <div>
+                               <label className="block text-xs font-bold text-gray-500 mb-1">한줄 설명 (카드 노출용)</label>
+                               <input type="text" placeholder="예: 독서 모임을 위한 질문지와 가이드라인입니다." value={resourceForm.description} onChange={e=>setResourceForm({...resourceForm, description: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
+                           </div>
+
+                           <div className="grid grid-cols-2 gap-4">
+                               <div>
+                                   <label className="block text-xs font-bold text-gray-500 mb-1">해당 도서</label>
+                                   <select value={resourceForm.bookId || ""} onChange={e=>setResourceForm({...resourceForm, bookId: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900">
+                                       <option value="">선택 안 함</option>
+                                       {books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                                   </select>
+                               </div>
+                               <div>
+                                   <label className="block text-xs font-bold text-gray-500 mb-1">파일 형식</label>
+                                   <select value={resourceForm.type} onChange={e=>setResourceForm({...resourceForm, type: e.target.value as any})} className="w-full p-2 border rounded bg-white text-gray-900">
+                                       <option value="PDF">PDF</option>
+                                       <option value="ZIP">ZIP</option>
+                                       <option value="LINK">LINK</option>
+                                   </select>
+                               </div>
+                           </div>
+
+                           <div className="grid grid-cols-2 gap-4 items-end">
+                               <div>
+                                   <label className="block text-xs font-bold text-gray-500 mb-2">자료 구분</label>
+                                   <div className="flex gap-2 border p-2 rounded bg-white">
+                                       <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={resourceForm.category==='PUBLIC'} onChange={()=>setResourceForm({...resourceForm, category:'PUBLIC'})} /> <span className="text-sm">일반</span></label>
+                                       <label className="flex items-center gap-1 cursor-pointer"><input type="radio" checked={resourceForm.category==='BOOK'} onChange={()=>setResourceForm({...resourceForm, category:'BOOK'})} /> <span className="text-sm">도서인증</span></label>
+                                   </div>
+                               </div>
+                               <div>
+                                   <label className="block text-xs font-bold text-gray-500 mb-1">인증 코드 (인증 선택 시)</label>
+                                   <input type="text" placeholder="예: book@1234" value={resourceForm.downloadCode || ""} onChange={e=>setResourceForm({...resourceForm, downloadCode: e.target.value})} disabled={resourceForm.category !== 'BOOK'} className="w-full p-2 border rounded bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-400" />
+                               </div>
+                           </div>
+
+                           <div>
+                               <label className="block text-xs font-bold text-gray-500 mb-1">자료 상세설명</label>
+                               <textarea rows={4} placeholder="자료에 대한 자세한 설명을 입력하세요." value={resourceForm.detailedDescription || ""} onChange={e=>setResourceForm({...resourceForm, detailedDescription: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
+                           </div>
+
+                           <div className="grid grid-cols-3 gap-4">
+                               <div className="col-span-2">
+                                   <label className="block text-xs font-bold text-gray-500 mb-1">다운로드 링크 (URL)</label>
+                                   <input type="text" placeholder="https://..." value={resourceForm.url} onChange={e=>setResourceForm({...resourceForm, url: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
+                               </div>
+                               <div>
+                                   <label className="block text-xs font-bold text-gray-500 mb-1">용량</label>
+                                   <input type="text" placeholder="예: 5MB" value={resourceForm.size} onChange={e=>setResourceForm({...resourceForm, size: e.target.value})} className="w-full p-2 border rounded bg-white text-gray-900" />
+                               </div>
+                           </div>
+
+                           <div className="flex gap-2 pt-2">
+                               <button type="submit" className="flex-1 py-3 bg-primary text-white rounded-lg font-bold hover:bg-opacity-90 transition-colors">
+                                   {isEditingResource ? '수정 완료' : '등록 하기'}
+                               </button>
+                               {isEditingResource && (
+                                   <button type="button" onClick={resetResourceForm} className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-colors">
+                                       취소
+                                   </button>
+                               )}
+                           </div>
+                       </form>
                    </div>
                </div>
            )}

@@ -86,7 +86,8 @@ export interface Resource {
   title: string;
   type: 'PDF' | 'ZIP' | 'LINK';
   size?: string;
-  description: string;
+  description: string; // 한줄 설명
+  detailedDescription?: string; // 상세 설명
   url: string;
   category?: 'PUBLIC' | 'BOOK'; 
   downloadCode?: string; 
