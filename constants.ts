@@ -129,7 +129,7 @@ export const INITIAL_RESOURCES = [
     "id": 1764730124423,
     "title": "참고 문헌, 기관 및 URL",
     "type": "PDF",
-    "description": "AI 시대의 기본소득, 아니 기본배당 책자의 참고문헌 뫄 주요 기관 목록",
+    "description": "AI 시대의 기본소득, 아니 기본배당 책자의 참고문헌 과 주요 기관 목록",
     "detailedDescription": "사용된 참고 문헌과, 주요 기관들을 한 줄씩 설명하고, 모든 자료마다 유효한 접속 링크를 달았습니다. 접속검증 일자는 2025.11.12 일 입니다. 웹의 특성상 URL 이 달라질 수 있으니 접속이 않되면, 제목이나 기관 명 등으로 검색을 하시기 바랍니다. ",
     "url": "https://drive.google.com/file/d/1Q2ltF6pOiYBByaw9AKV6MpZko-EiPgL7/view?usp=drive_link",
     "size": "1MB",

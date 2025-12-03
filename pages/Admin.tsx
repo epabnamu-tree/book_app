@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle, Shield, Unlock, Globe, Map } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle, Shield, Unlock, Globe, Map, FileDown, CheckCircle, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource, FaqItem, Article, Post, Comment, ArticleComment } from '../types';
 
@@ -70,6 +71,7 @@ const Admin: React.FC = () => {
   
   const [sitemapCode, setSitemapCode] = useState("");
   const [robotsCode, setRobotsCode] = useState("");
+  const [siteDomain, setSiteDomain] = useState("https://www.epabnamu.org"); // 도메인 입력 상태 변경
 
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
 
@@ -90,19 +92,21 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
     setExportCode(code);
   };
 
+  const cleanDomain = (url: string) => url.replace(/\/$/, ""); // 뒤에 붙은 슬래시 제거
+
   const generateSitemap = () => {
-    const domain = window.location.origin; // 현재 도메인 사용
+    const domain = cleanDomain(siteDomain) || window.location.origin;
     const today = new Date().toISOString().split('T')[0];
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${domain}/</loc><lastmod>${today}</lastmod><priority>1.0</priority></url>
-  <url><loc>${domain}/about</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
-  <url><loc>${domain}/library</loc><lastmod>${today}</lastmod><priority>0.9</priority></url>
-  <url><loc>${domain}/articles</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
-  <url><loc>${domain}/discussion</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
-  <url><loc>${domain}/resources</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
-  <url><loc>${domain}/contact</loc><lastmod>${today}</lastmod><priority>0.6</priority></url>
+  <url><loc>${domain}/#/about</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
+  <url><loc>${domain}/#/library</loc><lastmod>${today}</lastmod><priority>0.9</priority></url>
+  <url><loc>${domain}/#/articles</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
+  <url><loc>${domain}/#/discussion</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
+  <url><loc>${domain}/#/resources</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
+  <url><loc>${domain}/#/contact</loc><lastmod>${today}</lastmod><priority>0.6</priority></url>
 `;
 
     books.forEach(book => {
@@ -111,16 +115,33 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
 
     xml += `</urlset>`;
     setSitemapCode(xml);
+    return xml; // 반환값 추가 (다운로드용)
   };
 
   const generateRobots = () => {
-      const domain = window.location.origin;
+      const domain = cleanDomain(siteDomain) || window.location.origin;
       const txt = `User-agent: *
 Allow: /
 Disallow: /admin
 
 Sitemap: ${domain}/sitemap.xml`;
       setRobotsCode(txt);
+      return txt; // 반환값 추가 (다운로드용)
+  };
+
+  // 파일 다운로드 함수
+  const downloadFile = (filename: string, content: string) => {
+    if (!content) {
+        alert("먼저 코드를 생성해주세요.");
+        return;
+    }
+    const element = document.createElement("a");
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   useEffect(() => {
@@ -417,58 +438,109 @@ Sitemap: ${domain}/sitemap.xml`;
            {activeTab === 'faq' && (<div><h2 className="text-xl font-bold mb-4">FAQ 관리</h2><form onSubmit={handleSaveFaq}><input className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} placeholder="질문"/><textarea className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} placeholder="답변"/><button className="bg-primary text-white px-4 py-2 rounded">저장</button></form><div className="mt-4">{faqs.map(f=><div key={f.id} className="border-b p-2 flex justify-between"><span>{f.question}</span><button onClick={()=>openDeleteModal('faq', f.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div>)}</div></div>)}
            
            {activeTab === 'site' && (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-8">
-                       <div className="p-6 border rounded-xl bg-gray-50">
-                           <h3 className="font-bold mb-4 text-lg">프로필 이미지</h3>
-                           <div className="flex gap-4">
-                               <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="flex-1 p-2 border rounded bg-white text-gray-900" />
-                               <button onClick={handleSaveSiteSettings} className="bg-primary text-white px-6 py-2 rounded font-bold">저장</button>
-                           </div>
-                           {previewUrl && <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-2xl object-cover mt-2" />}
-                       </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
+                   
+                   {/* 왼쪽: 배포 가이드 영역 */}
+                   <div className="space-y-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                            <h2 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                <Rocket size={24} /> 배포(Update) 가이드
+                            </h2>
+                            <p className="text-sm text-blue-700 mb-6">
+                                이 앱은 데이터베이스가 없는 정적 웹사이트입니다.<br/>
+                                내용을 수정하신 후, 반드시 아래 3단계를 수행해야 실제 사용자에게 반영됩니다.
+                            </p>
+                            
+                            <div className="space-y-6">
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0">1</div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-800">데이터 내보내기 (필수)</h4>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            우측의 [데이터 내보내기] 박스에서 코드를 복사하여, 프로젝트의 <code>constants.ts</code> 파일에 덮어씌워 주세요.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0">2</div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-800">Sitemap 갱신 (선택)</h4>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            새로운 <b>책</b>을 등록했다면, 아래에서 Sitemap을 다운로드하여 <code>public/sitemap.xml</code> 파일을 교체해 주세요. (글/자료 수정 시에는 불필요)
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0">3</div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-800">Github 배포</h4>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            수정된 파일들을 Github에 Commit & Push 하세요. Vercel이 자동으로 배포합니다.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                        {/* SEO Generator */}
-                       <div className="p-6 border rounded-xl bg-blue-50 border-blue-100">
-                           <h3 className="font-bold mb-4 text-lg flex items-center gap-2 text-blue-800"><Globe size={20}/> 검색엔진 최적화 (SEO)</h3>
-                           <div className="flex gap-2 mb-4">
-                               <button onClick={generateSitemap} className="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1"><Map size={16}/> Sitemap 생성</button>
-                               <button onClick={generateRobots} className="bg-gray-700 text-white px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1">Robots.txt 생성</button>
-                           </div>
+                       <div className="p-6 border rounded-xl bg-gray-50 border-gray-200">
+                           <h3 className="font-bold mb-4 text-lg flex items-center gap-2 text-gray-800"><Globe size={20}/> 검색엔진 최적화 (SEO)</h3>
                            
-                           {sitemapCode && (
-                               <div className="mb-4">
-                                   <div className="flex justify-between items-center mb-1">
-                                       <span className="text-xs font-bold text-gray-500">sitemap.xml (복사해서 public/sitemap.xml 저장)</span>
-                                       <button onClick={() => navigator.clipboard.writeText(sitemapCode)} className="text-xs text-blue-600 font-bold hover:underline">복사하기</button>
-                                   </div>
-                                   <textarea readOnly value={sitemapCode} className="w-full h-32 p-2 text-xs border rounded bg-white text-gray-800 font-mono"></textarea>
-                               </div>
-                           )}
+                           <div className="mb-4">
+                               <label className="block text-xs font-bold text-gray-600 mb-1">사이트 도메인</label>
+                               <input 
+                                   type="text" 
+                                   value={siteDomain} 
+                                   onChange={e => setSiteDomain(e.target.value)} 
+                                   className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                   placeholder="https://your-domain.com"
+                               />
+                           </div>
 
-                            {robotsCode && (
-                               <div>
-                                   <div className="flex justify-between items-center mb-1">
-                                       <span className="text-xs font-bold text-gray-500">robots.txt (복사해서 public/robots.txt 저장)</span>
-                                       <button onClick={() => navigator.clipboard.writeText(robotsCode)} className="text-xs text-blue-600 font-bold hover:underline">복사하기</button>
-                                   </div>
-                                   <textarea readOnly value={robotsCode} className="w-full h-24 p-2 text-xs border rounded bg-white text-gray-800 font-mono"></textarea>
-                               </div>
-                           )}
+                           <div className="flex gap-2 mb-4">
+                               <button 
+                                   onClick={() => { const content = generateSitemap(); downloadFile('sitemap.xml', content); }} 
+                                   className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
+                               >
+                                   <FileDown size={16}/> Sitemap 다운로드
+                               </button>
+                               <button 
+                                   onClick={() => { const content = generateRobots(); downloadFile('robots.txt', content); }} 
+                                   className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
+                               >
+                                   <FileDown size={16}/> Robots.txt 다운로드
+                               </button>
+                           </div>
+                       </div>
+                       
+                        <div className="p-6 border rounded-xl bg-gray-50">
+                           <h3 className="font-bold mb-4 text-lg">프로필 이미지 변경</h3>
+                           <div className="flex gap-4">
+                               <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="flex-1 p-2 border rounded bg-white text-gray-900 text-sm" placeholder="이미지 URL" />
+                               <button onClick={handleSaveSiteSettings} className="bg-gray-800 text-white px-4 py-2 rounded font-bold text-sm">저장</button>
+                           </div>
+                           {previewUrl && <img src={previewUrl} alt="Preview" className="w-24 h-24 rounded-full object-cover mt-4 border border-gray-200" />}
                        </div>
                    </div>
 
+                   {/* 오른쪽: 데이터 내보내기/초기화 */}
                    <div className="space-y-8">
-                       <div className="p-4 bg-gray-900 text-green-400 rounded relative">
-                           <h3 className="font-bold mb-2">데이터 내보내기 (Deploy용)</h3>
-                           <button onClick={generateExportCode} className="absolute top-4 right-20 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1"><RefreshCw size={12}/> 코드 갱신</button>
-                           <pre className="text-xs whitespace-pre-wrap max-h-96 overflow-y-auto">{exportCode}</pre>
-                           <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-700 text-white px-3 py-1 rounded text-xs absolute top-4 right-4">Copy</button>
+                       <div className="p-4 bg-gray-900 text-green-400 rounded relative shadow-lg">
+                           <h3 className="font-bold mb-2 flex items-center gap-2"><CheckCircle size={18}/> 데이터 내보내기 (constants.ts)</h3>
+                           <p className="text-xs text-gray-400 mb-4 border-b border-gray-700 pb-2">
+                               아래 코드를 복사해서 <code>constants.ts</code> 전체 내용을 교체하세요.
+                           </p>
+                           <button onClick={generateExportCode} className="absolute top-4 right-20 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1 hover:bg-blue-700"><RefreshCw size={12}/> 코드 갱신</button>
+                           <pre className="text-xs whitespace-pre-wrap max-h-[500px] overflow-y-auto bg-black p-4 rounded font-mono border border-gray-700">{exportCode}</pre>
+                           <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-xs absolute top-4 right-4 font-bold shadow-md">Copy</button>
                        </div>
                        
                        <div className="p-4 border rounded bg-red-50 border-red-200">
-                           <h3 className="font-bold mb-2 flex items-center gap-2 text-red-700"><RotateCcw size={18} /> 데이터 초기화 (주의)</h3>
-                           <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold w-full">초기화 (Factory Reset)</button>
+                           <h3 className="font-bold mb-2 flex items-center gap-2 text-red-700"><AlertTriangle size={18} /> 데이터 초기화 (주의)</h3>
+                           <p className="text-xs text-red-600 mb-3">브라우저에 저장된 임시 데이터를 모두 삭제하고 초기 상태로 되돌립니다.</p>
+                           <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold w-full hover:bg-red-700">초기화 (Factory Reset)</button>
                        </div>
                    </div>
                </div>
@@ -510,4 +582,8 @@ Sitemap: ${domain}/sitemap.xml`;
     </div>
   );
 };
+
+// @ts-ignore
+const Rocket = ({size}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>;
+
 export default Admin;
