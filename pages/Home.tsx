@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PenTool, Mic, ChevronRight, Book as BookIcon } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 
 const Home: React.FC = () => {
-  useSEO({ title: "홈", description: "기술의 진보와 인간의 삶, 조화로운 공존을 탐구하는 연구그룹 이팝나무입니다." });
   const { books, authorProfileImage } = useData();
   const [rotatingIndex, setRotatingIndex] = useState(0);
   const pinnedBooks = books.filter(b => b.isPinned).slice(0, 2);
@@ -23,6 +22,11 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-0">
+      <SEO 
+        title="홈" 
+        description="기술의 진보와 인간의 삶, 조화로운 공존을 탐구하는 연구그룹 이팝나무입니다. AI, 기본소득, 커먼즈 연구."
+        image={authorProfileImage}
+      />
       <section className="relative min-h-[600px] flex items-center bg-[#F9F7F2] overflow-hidden py-12 md:py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col-reverse md:flex-row items-center gap-16 w-full relative z-10">
           <div className="flex-1 space-y-8 text-center md:text-left">
@@ -40,7 +44,6 @@ const Home: React.FC = () => {
               기술이 바꾸는 현실 속에서 사회과학의 눈으로 질문합니다. <br/><b>AI는 어떻게 존재해야 하는가?</b><br/>연구그룹 이팝나무는 인공지능이 일부가 아닌 모두의 삶을 이롭게 하는 세상을 향해 연구하고 실천합니다.
             </p>
             <div className="pt-4 flex justify-center md:justify-start gap-4">
-               {/* 🚀 [수정됨] 링크 경로를 /about으로 명확히 지정 */}
                <Link to="/about" className="px-8 py-3.5 bg-white border border-gray-200 text-primary rounded-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow flex items-center gap-3">소개 더 보기</Link>
             </div>
           </div>
@@ -48,7 +51,7 @@ const Home: React.FC = () => {
              <div className="relative w-full aspect-[4/3] md:aspect-square max-w-md mx-auto">
                 <div className="absolute top-6 left-6 w-full h-full bg-primary/5 rounded-2xl -z-10"></div>
                 <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/50 bg-white">
-                  <img src={authorProfileImage} alt="Research Group Epabnamu" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                  <img src={authorProfileImage} alt="Research Group Epabnamu" className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
                 </div>
              </div>
           </div>

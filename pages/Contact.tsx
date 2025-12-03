@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Mail, ChevronDown, ChevronUp, Send } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 
 const Contact: React.FC = () => {
-  useSEO({ title: "문의하기", description: "강연 요청, 오탈자 제보, 기타 문의를 남겨주세요." });
   const { faqs } = useData();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [formData, setFormData] = useState({ name: '', email: '', type: '강연 요청', message: '' });
@@ -13,6 +12,10 @@ const Contact: React.FC = () => {
 
   return (
     <div className="bg-[#F9F7F2] min-h-screen py-12">
+      <SEO 
+        title="문의하기" 
+        description="이팝나무에 강연 요청, 오탈자 제보, 기타 문의를 남겨주세요. 자주 묻는 질문(FAQ)도 확인하실 수 있습니다." 
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16"><h1 className="text-4xl font-serif font-bold text-primary mb-4">문의하기</h1></div>
         <div className="grid lg:grid-cols-2 gap-12">

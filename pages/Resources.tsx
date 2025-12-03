@@ -4,10 +4,9 @@ import { useLocation } from 'react-router-dom';
 import { FileText, Download, ExternalLink, Archive, Lock, X, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Resource } from '../types';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 
 const Resources: React.FC = () => {
-  useSEO({ title: "자료실", description: "도서 부록 및 연구 자료를 다운로드할 수 있습니다." });
   const { resources, books } = useData();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -45,6 +44,10 @@ const Resources: React.FC = () => {
 
   return (
     <div className="py-12 bg-white min-h-screen">
+      <SEO 
+        title="자료실" 
+        description="이팝나무 도서의 부록 및 연구 자료를 다운로드할 수 있습니다. 독서 가이드, 통계 데이터 등 다양한 자료를 제공합니다." 
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12"><h1 className="text-4xl font-serif font-bold text-primary mb-4">자료실 & 부록</h1></div>
         <div className="flex justify-center mb-12">

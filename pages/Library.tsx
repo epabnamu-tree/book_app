@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 
 const Library: React.FC = () => {
-  useSEO({ title: "이팝나무의 서재", description: "연구그룹 이팝나무의 도서 목록입니다." });
   const { books } = useData();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const categories = ["All", ...Array.from(new Set(books.map(b => b.category || "기타").filter(Boolean)))];
@@ -13,6 +12,10 @@ const Library: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F7F2] py-12">
+      <SEO 
+        title="이팝나무의 서재" 
+        description="연구그룹 이팝나무가 집필하고 연구한 도서 목록입니다. AI, 기본소득, 사회적 경제 관련 저서들을 만나보세요." 
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <span className="text-secondary font-bold tracking-widest text-sm uppercase mb-3 block">Epabnamu Library</span>

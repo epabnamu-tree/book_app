@@ -1,13 +1,17 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 
 const About: React.FC = () => {
-  useSEO({ title: "소개", description: "연구그룹 이팝나무의 철학과 비전을 소개합니다." });
   const { authorProfileImage } = useData();
 
   return (
     <div className="bg-[#F9F7F2] min-h-screen py-16">
+      <SEO 
+        title="소개" 
+        description="연구그룹 이팝나무의 철학과 비전을 소개합니다. '기술이 누구를 위해 존재해야 하는가'를 묻는 연구 공동체입니다." 
+        image={authorProfileImage}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 animate-fade-in-up">
           <span className="text-secondary font-bold tracking-widest text-sm uppercase mb-3 block">Research Group Epabnamu</span>

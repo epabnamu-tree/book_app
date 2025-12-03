@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { PenTool, Calendar, User, ChevronDown, ChevronUp, Layout as LayoutIcon, List, MessageSquare } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { useSEO } from '../hooks/useSEO';
+import SEO from '../components/SEO';
 import Comments from '../components/Comments';
 
 const Articles: React.FC = () => {
-  useSEO({ title: "글 나누기", description: "연구그룹 이팝나무의 칼럼, 에세이, 공지사항을 공유하는 공간입니다." });
-  
   const { articles } = useData();
   const [viewMode, setViewMode] = useState<'feed' | 'list'>('feed');
   const [expandedArticleId, setExpandedArticleId] = useState<number | null>(null);
@@ -26,6 +24,10 @@ const Articles: React.FC = () => {
 
   return (
     <div className="bg-[#F9F7F2] min-h-screen py-12">
+      <SEO 
+        title="글 나누기" 
+        description="연구그룹 이팝나무의 칼럼, 에세이, 공지사항을 공유하는 공간입니다. 기술과 사회에 대한 깊이 있는 통찰을 나눕니다." 
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12">

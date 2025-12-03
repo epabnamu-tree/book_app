@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle, Shield, Unlock } from 'lucide-react';
+import { Lock, LogOut, Plus, Trash2, Edit, Save, X, FileText, Download, Link as LinkIcon, Image, Key, Pin, HelpCircle, BookOpen, ShoppingCart, PenTool, Eye, EyeOff, MessageSquare, RotateCcw, RefreshCw, AlertTriangle, Shield, Unlock, Globe, Map } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Book, Resource, FaqItem, Article, Post, Comment, ArticleComment } from '../types';
 
@@ -67,6 +67,9 @@ const Admin: React.FC = () => {
   const [editingComment, setEditingComment] = useState<{postId: number, comment: Comment} | null>(null);
 
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, type: 'article' | 'book' | 'resource' | 'faq' | null, id: any | null }>({ isOpen: false, type: null, id: null });
+  
+  const [sitemapCode, setSitemapCode] = useState("");
+  const [robotsCode, setRobotsCode] = useState("");
 
   useEffect(() => { setProfileImageUrl(authorProfileImage); setPreviewUrl(authorProfileImage); }, [authorProfileImage]);
 
@@ -85,6 +88,39 @@ export const FAQS = ${JSON.stringify(faqs, null, 2)};
 export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
     `;
     setExportCode(code);
+  };
+
+  const generateSitemap = () => {
+    const domain = window.location.origin; // 현재 도메인 사용
+    const today = new Date().toISOString().split('T')[0];
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${domain}/</loc><lastmod>${today}</lastmod><priority>1.0</priority></url>
+  <url><loc>${domain}/about</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
+  <url><loc>${domain}/library</loc><lastmod>${today}</lastmod><priority>0.9</priority></url>
+  <url><loc>${domain}/articles</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>
+  <url><loc>${domain}/discussion</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
+  <url><loc>${domain}/resources</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>
+  <url><loc>${domain}/contact</loc><lastmod>${today}</lastmod><priority>0.6</priority></url>
+`;
+
+    books.forEach(book => {
+        xml += `  <url><loc>${domain}/#/book/${book.id}</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>\n`;
+    });
+
+    xml += `</urlset>`;
+    setSitemapCode(xml);
+  };
+
+  const generateRobots = () => {
+      const domain = window.location.origin;
+      const txt = `User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: ${domain}/sitemap.xml`;
+      setRobotsCode(txt);
   };
 
   useEffect(() => {
@@ -381,24 +417,59 @@ export const CHAPTERS = [ { id: 1, title: "1장", description: "내용" } ];
            {activeTab === 'faq' && (<div><h2 className="text-xl font-bold mb-4">FAQ 관리</h2><form onSubmit={handleSaveFaq}><input className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.question} onChange={e=>setFaqForm({...faqForm, question: e.target.value})} placeholder="질문"/><textarea className="w-full p-2 border mb-2 bg-white text-gray-900" value={faqForm.answer} onChange={e=>setFaqForm({...faqForm, answer: e.target.value})} placeholder="답변"/><button className="bg-primary text-white px-4 py-2 rounded">저장</button></form><div className="mt-4">{faqs.map(f=><div key={f.id} className="border-b p-2 flex justify-between"><span>{f.question}</span><button onClick={()=>openDeleteModal('faq', f.id)} className="text-red-500 flex items-center gap-1"><Trash2 size={14}/> 삭제</button></div>)}</div></div>)}
            
            {activeTab === 'site' && (
-               <div className="space-y-8">
-                   <div className="p-6 border rounded-xl bg-gray-50">
-                       <h3 className="font-bold mb-4 text-lg">프로필 이미지</h3>
-                       <div className="flex gap-4">
-                           <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="flex-1 p-2 border rounded bg-white text-gray-900" />
-                           <button onClick={handleSaveSiteSettings} className="bg-primary text-white px-6 py-2 rounded font-bold">저장</button>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-8">
+                       <div className="p-6 border rounded-xl bg-gray-50">
+                           <h3 className="font-bold mb-4 text-lg">프로필 이미지</h3>
+                           <div className="flex gap-4">
+                               <input type="text" value={profileImageUrl} onChange={e => handleProfileImageChange(e.target.value)} className="flex-1 p-2 border rounded bg-white text-gray-900" />
+                               <button onClick={handleSaveSiteSettings} className="bg-primary text-white px-6 py-2 rounded font-bold">저장</button>
+                           </div>
+                           {previewUrl && <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-2xl object-cover mt-2" />}
                        </div>
-                       {previewUrl && <img src={previewUrl} alt="Preview" className="w-48 h-48 rounded-2xl object-cover mt-2" />}
+
+                       {/* SEO Generator */}
+                       <div className="p-6 border rounded-xl bg-blue-50 border-blue-100">
+                           <h3 className="font-bold mb-4 text-lg flex items-center gap-2 text-blue-800"><Globe size={20}/> 검색엔진 최적화 (SEO)</h3>
+                           <div className="flex gap-2 mb-4">
+                               <button onClick={generateSitemap} className="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1"><Map size={16}/> Sitemap 생성</button>
+                               <button onClick={generateRobots} className="bg-gray-700 text-white px-4 py-2 rounded font-bold text-sm flex-1 flex items-center justify-center gap-1">Robots.txt 생성</button>
+                           </div>
+                           
+                           {sitemapCode && (
+                               <div className="mb-4">
+                                   <div className="flex justify-between items-center mb-1">
+                                       <span className="text-xs font-bold text-gray-500">sitemap.xml (복사해서 public/sitemap.xml 저장)</span>
+                                       <button onClick={() => navigator.clipboard.writeText(sitemapCode)} className="text-xs text-blue-600 font-bold hover:underline">복사하기</button>
+                                   </div>
+                                   <textarea readOnly value={sitemapCode} className="w-full h-32 p-2 text-xs border rounded bg-white text-gray-800 font-mono"></textarea>
+                               </div>
+                           )}
+
+                            {robotsCode && (
+                               <div>
+                                   <div className="flex justify-between items-center mb-1">
+                                       <span className="text-xs font-bold text-gray-500">robots.txt (복사해서 public/robots.txt 저장)</span>
+                                       <button onClick={() => navigator.clipboard.writeText(robotsCode)} className="text-xs text-blue-600 font-bold hover:underline">복사하기</button>
+                                   </div>
+                                   <textarea readOnly value={robotsCode} className="w-full h-24 p-2 text-xs border rounded bg-white text-gray-800 font-mono"></textarea>
+                               </div>
+                           )}
+                       </div>
                    </div>
-                   <div className="p-4 border rounded bg-gray-50 border-gray-200">
-                       <h3 className="font-bold mb-2 flex items-center gap-2"><RotateCcw size={18} className="text-red-500"/> 데이터 초기화</h3>
-                       <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold">초기화</button>
-                   </div>
-                   <div className="p-4 bg-gray-900 text-green-400 rounded relative">
-                       <h3 className="font-bold mb-2">데이터 내보내기 (Deploy용)</h3>
-                       <button onClick={generateExportCode} className="absolute top-4 right-20 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1"><RefreshCw size={12}/> 코드 갱신</button>
-                       <pre className="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto">{exportCode}</pre>
-                       <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-700 text-white px-3 py-1 rounded text-xs absolute top-4 right-4">Copy</button>
+
+                   <div className="space-y-8">
+                       <div className="p-4 bg-gray-900 text-green-400 rounded relative">
+                           <h3 className="font-bold mb-2">데이터 내보내기 (Deploy용)</h3>
+                           <button onClick={generateExportCode} className="absolute top-4 right-20 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1"><RefreshCw size={12}/> 코드 갱신</button>
+                           <pre className="text-xs whitespace-pre-wrap max-h-96 overflow-y-auto">{exportCode}</pre>
+                           <button onClick={() => navigator.clipboard.writeText(exportCode)} className="mt-2 bg-green-700 text-white px-3 py-1 rounded text-xs absolute top-4 right-4">Copy</button>
+                       </div>
+                       
+                       <div className="p-4 border rounded bg-red-50 border-red-200">
+                           <h3 className="font-bold mb-2 flex items-center gap-2 text-red-700"><RotateCcw size={18} /> 데이터 초기화 (주의)</h3>
+                           <button onClick={handleFactoryReset} className="bg-red-600 text-white px-4 py-2 rounded font-bold w-full">초기화 (Factory Reset)</button>
+                       </div>
                    </div>
                </div>
            )}
